@@ -15,14 +15,16 @@ WPF와 MVVM 패턴을 학습하기 위한 간단한 할 일 관리 앱입니다.
 
 - 새 할 일 입력
 - Enter 키 또는 추가 버튼으로 할 일 추가
+- 앱 시작 및 할 일 추가 후 입력창 포커스 유지
 - 체크박스로 완료 상태 변경
 - 완료된 항목에 취소선 표시
 - 삭제 버튼으로 할 일 제거
 - 완료 항목 삭제 및 전체 삭제
 - 할 일 제목 수정, 저장, 취소
+- 수정 입력창에서 Enter 저장, Esc 취소
 - 할 일 목록 JSON 자동 저장 및 앱 시작 시 불러오기
 - 전체 / 진행 중 / 완료 필터
-- 할 일 제목 검색 및 검색어 초기화
+- 할 일 제목 검색 및 Esc/버튼으로 검색어 초기화
 - ViewModel 단위 테스트
 - 스타일과 리소스 딕셔너리 분리
 
@@ -55,7 +57,7 @@ learning-wpf-todolist/
 ## 주요 파일
 
 - `MainWindow.xaml`: 화면 레이아웃과 바인딩을 정의합니다.
-- `MainWindow.xaml.cs`: Window 초기화와 `DataContext` 설정을 담당합니다.
+- `MainWindow.xaml.cs`: Window 초기화, `DataContext` 설정, 입력 포커스와 키보드 사용성 처리를 담당합니다.
 - `ViewModels/MainWindowViewModel.cs`: 할 일 목록, 입력값, 추가/삭제/수정/필터/검색 명령을 관리합니다.
 - `ViewModels/TodoFilter.cs`: 전체, 진행 중, 완료 필터 값을 정의합니다.
 - `Models/TodoItems.cs`: 할 일 항목의 데이터와 변경 알림 속성을 정의합니다.
@@ -103,8 +105,8 @@ dotnet test
 
 ## 다음 학습 과제
 
-- 입력 포커스, 단축키, 사용성 개선
 - ViewModel Locator 또는 의존성 주입 적용
+- 스타일 리소스 심화
 
 ## 메모
 

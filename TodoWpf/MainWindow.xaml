@@ -5,7 +5,8 @@
         Title="WPF 할 일 관리"
         Width="560"
         Height="420"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Loaded="Window_Loaded">
 
     <Grid Margin="24">
         <Grid.RowDefinitions>
@@ -23,16 +24,18 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox Grid.Column="0"
+            <TextBox x:Name="NewTodoTitleTextBox"
+                     Grid.Column="0"
                      Style="{StaticResource InputTextBoxStyle}"
                      Text="{Binding NewTodoTitle,
-                UpdateSourceTrigger=PropertyChanged}"/>
+                                    UpdateSourceTrigger=PropertyChanged}"/>
 
             <Button Grid.Column="1"
                     Style="{StaticResource AddButtonStyle}"
                     Content="추가"
                     IsDefault="True"
-                    Command="{Binding AddTodoCommand}"/>
+                    Command="{Binding AddTodoCommand}"
+                    Click="AddButton_Click"/>
         </Grid>
 
 
@@ -74,10 +77,15 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox Grid.Column="0"
+            <TextBox x:Name="SearchTextBox"
+                     Grid.Column="0"
                      Style="{StaticResource InputTextBoxStyle}"
                      Text="{Binding SearchText,
-                UpdateSourceTrigger=PropertyChanged}"/>
+                                    UpdateSourceTrigger=PropertyChanged}"
+                     KeyDown="SearchTextBox_KeyDown"
+                     Height="36"
+                     Margin="0,0,8,0"
+                     VerticalAlignment="Top"/>
 
             <Button Grid.Column="1"
                     Style="{StaticResource SmallButtonStyle}"
@@ -94,21 +102,24 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox Grid.Column="0"
-             Style="{StaticResource InputTextBoxStyle}"
-             Text="{Binding EditTodoTitle,
-                            UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBox x:Name="EditTodoTitleTextBox"
+                     Grid.Column="0"
+                     Style="{StaticResource InputTextBoxStyle}"
+                     Text="{Binding EditTodoTitle,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                     IsVisibleChanged="EditTodoTitleTextBox_IsVisibleChanged"
+                     KeyDown="EditTodoTitleTextBox_KeyDown"/>
 
             <Button Grid.Column="1"
-            Margin="0,0,8,0"
-            Style="{StaticResource SmallButtonStyle}"
-            Content="저장"
-            Command="{Binding SaveEditCommand}"/>
+                    Margin="0,0,8,0"
+                    Style="{StaticResource SmallButtonStyle}"
+                    Content="저장"
+                    Command="{Binding SaveEditCommand}"/>
 
             <Button Grid.Column="2"
-            Style="{StaticResource SmallButtonStyle}"
-            Content="취소"
-            Command="{Binding CancelEditCommand}"/>
+                    Style="{StaticResource SmallButtonStyle}"
+                    Content="취소"
+                    Command="{Binding CancelEditCommand}"/>
         </Grid>
 
         <ListBox Grid.Row="4"

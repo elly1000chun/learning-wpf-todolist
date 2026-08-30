@@ -1,10 +1,11 @@
-﻿using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Windows;
+using System.Windows.Data;
 using TodoWpf.Models;
 using TodoWpf.Services;
-using System.ComponentModel;
-using System.Windows.Data;
 
 namespace TodoWpf.ViewModels;
 
@@ -35,7 +36,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     public ICollectionView TodosView { get; }
 
-
+    // Constructors ---------------------------------
     public MainWindowViewModel()
     : this(new TodoStorageService())
     {
@@ -66,6 +67,7 @@ public partial class MainWindowViewModel : ObservableObject
         TodosView = CollectionViewSource.GetDefaultView(Todos);
         TodosView.Filter = FilterTodo;
     }
+    // _Constructors
 
     private void OnTodoItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
