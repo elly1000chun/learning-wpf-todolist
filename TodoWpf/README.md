@@ -18,6 +18,7 @@ WPF와 MVVM 패턴을 학습하기 위한 간단한 할 일 관리 앱입니다.
 - 체크박스로 완료 상태 변경
 - 완료된 항목에 취소선 표시
 - 삭제 버튼으로 할 일 제거
+- 할 일 목록 JSON 자동 저장 및 앱 시작 시 불러오기
 
 ## 프로젝트 구조
 
@@ -29,6 +30,8 @@ TodoWpf/
 ├─ MainWindow.xaml.cs
 ├─ Models/
 │  └─ TodoItems.cs
+├─ Services/
+│  └─ TodoStorageService.cs
 ├─ ViewModels/
 │  └─ MainWindowViewModel.cs
 └─ TodoWpf.csproj
@@ -40,6 +43,7 @@ TodoWpf/
 - `MainWindow.xaml.cs`: Window 초기화와 `DataContext` 설정을 담당합니다.
 - `ViewModels/MainWindowViewModel.cs`: 할 일 목록, 입력값, 추가/삭제 명령을 관리합니다.
 - `Models/TodoItems.cs`: 할 일 항목의 데이터와 변경 알림 속성을 정의합니다.
+- `Services/TodoStorageService.cs`: 할 일 목록을 JSON 파일로 저장하고 불러옵니다.
 - `TodoWpf.csproj`: WPF, .NET, NuGet 패키지 설정을 관리합니다.
 
 ## 실행 방법
@@ -54,6 +58,8 @@ dotnet run
 
 Visual Studio 또는 Rider에서 `TodoWpf.csproj`를 열어 실행할 수도 있습니다.
 
+할 일 데이터는 사용자 로컬 앱 데이터 폴더의 `TodoWpf\todos.json` 파일에 저장됩니다.
+
 ## 사용 기술
 
 - C#
@@ -62,13 +68,17 @@ Visual Studio 또는 Rider에서 `TodoWpf.csproj`를 열어 실행할 수도 있
 - .NET `net10.0-windows`
 - CommunityToolkit.Mvvm `8.4.2`
 
+## 학습 문서
+
+- [WPF C# 개발환경 가이드](../docs/wpf-csharp-development-guide.md): 개발 환경 선택부터 MVVM 할 일 앱 구현 흐름까지 정리한 최초 학습 노트입니다.
+
 ## 다음 학습 과제
 
+- 필터링 기능 추가: 전체, 진행 중, 완료
+- 검색 기능 추가
+- ViewModel 단위 테스트 추가
 - 할 일 수정 기능 추가
 - 전체 삭제 또는 완료 항목 삭제 기능 추가
-- 필터링 기능 추가: 전체, 진행 중, 완료
-- JSON 파일 저장/불러오기 추가
-- ViewModel 단위 테스트 추가
 - 스타일과 리소스 딕셔너리 분리
 - ViewModel Locator 또는 의존성 주입 적용
 
