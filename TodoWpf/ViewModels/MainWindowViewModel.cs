@@ -71,6 +71,7 @@ public partial class MainWindowViewModel : ObservableObject
     {
         SaveTodos();
         TodosView.Refresh();
+        ClearCompletedCommand.NotifyCanExecuteChanged();
     }
 
     private void AddTodoItem(TodoItem item)
@@ -128,12 +129,24 @@ public partial class MainWindowViewModel : ObservableObject
             && !string.IsNullOrWhiteSpace(EditTodoTitle);
     }
 
+    private bool CanClearCompleted()
+    {
+        return Todos.Any(todo => todo.IsDone);
+    }
+
+    private bool CanClearAll()
+    {
+        return Todos.Count > 0;
+    }
+
 
     partial void OnSearchTextChanged(string value)
     {
         TodosView.Refresh();
     }
 
+
+    // Replay commands
 
     [RelayCommand(CanExecute = nameof(CanAddTodo))]
     private void AddTodo()
@@ -150,6 +163,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         NewTodoTitle = string.Empty;
         SaveTodos();
+        ClearAllCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand]
@@ -166,6 +180,8 @@ public partial class MainWindowViewModel : ObservableObject
 
         RemoveTodoItem(item);
         SaveTodos();
+        ClearCompletedCommand.NotifyCanExecuteChanged();
+        ClearAllCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand]
@@ -207,5 +223,44 @@ public partial class MainWindowViewModel : ObservableObject
     {
         EditingTodo = null;
         EditTodoTitle = string.Empty;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanClearCompleted))]
+    private void ClearCompleted()
+    {
+        var completedTodos = Todos
+            .Where(todo => todo.IsDone)
+            .ToList();
+
+        foreach (var todo in completedTodos)
+        {
+            if (ReferenceEquals(EditingTodo, todo))
+            {
+                EditingTodo = null;
+                EditTodoTitle = string.Empty;
+            }
+
+            RemoveTodoItem(todo);
+        }
+
+        SaveTodos();
+        ClearCompletedCommand.NotifyCanExecuteChanged();
+        ClearAllCommand.NotifyCanExecuteChanged();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanClearAll))]
+    private void ClearAll()
+    {
+        foreach (var todo in Todos.ToList())
+        {
+            RemoveTodoItem(todo);
+        }
+
+        EditingTodo = null;
+        EditTodoTitle = string.Empty;
+
+        SaveTodos();
+        ClearCompletedCommand.NotifyCanExecuteChanged();
+        ClearAllCommand.NotifyCanExecuteChanged();
     }
 }

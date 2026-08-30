@@ -382,4 +382,146 @@ public class MainWindowViewModelTests
         Assert.Equal(string.Empty, viewModel.EditTodoTitle);
         Assert.Equal(1, storage.SaveCallCount);
     }
+
+    [Fact]
+    public void ClearCompletedCommand_RemovesOnlyCompletedTodosAndSaves()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var activeTodo = new TodoItem
+        {
+            Title = "진행 중 할 일",
+            IsDone = false
+        };
+
+        var completedTodo = new TodoItem
+        {
+            Title = "완료된 할 일",
+            IsDone = true
+        };
+
+        storage.TodosToLoad.Add(activeTodo);
+        storage.TodosToLoad.Add(completedTodo);
+
+        var viewModel = new MainWindowViewModel(storage);
+
+        viewModel.ClearCompletedCommand.Execute(null);
+
+        Assert.Contains(activeTodo, viewModel.Todos);
+        Assert.DoesNotContain(completedTodo, viewModel.Todos);
+        Assert.Equal(1, viewModel.Todos.Count);
+        Assert.Equal(1, storage.SaveCallCount);
+        Assert.Contains(storage.LastSavedTodos, todo => todo.Title == "진행 중 할 일");
+        Assert.DoesNotContain(storage.LastSavedTodos, todo => todo.Title == "완료된 할 일");
+    }
+
+
+    [Fact]
+    public void ClearCompletedCommand_CannotExecute_WhenThereAreNoCompletedTodos()
+    {
+        var storage = new FakeTodoStorageService();
+
+        storage.TodosToLoad.Add(new TodoItem
+        {
+            Title = "진행 중 할 일",
+            IsDone = false
+        });
+
+        var viewModel = new MainWindowViewModel(storage);
+
+        Assert.False(viewModel.ClearCompletedCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void ClearCompletedCommand_ClearsEditState_WhenEditingTodoIsCompleted()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var todo = new TodoItem
+        {
+            Title = "편집 중 완료 할 일",
+            IsDone = true
+        };
+
+        storage.TodosToLoad.Add(todo);
+
+        var viewModel = new MainWindowViewModel(storage);
+
+        viewModel.StartEditCommand.Execute(todo);
+        viewModel.EditTodoTitle = "수정 중인 제목";
+
+        viewModel.ClearCompletedCommand.Execute(null);
+
+        Assert.DoesNotContain(todo, viewModel.Todos);
+        Assert.Null(viewModel.EditingTodo);
+        Assert.Equal(string.Empty, viewModel.EditTodoTitle);
+        Assert.Equal(1, storage.SaveCallCount);
+    }
+
+    [Fact]
+    public void ClearAllCommand_RemovesAllTodosAndSaves()
+    {
+        var storage = new FakeTodoStorageService();
+
+        storage.TodosToLoad.Add(new TodoItem
+        {
+            Title = "첫 번째 할 일"
+        });
+
+        storage.TodosToLoad.Add(new TodoItem
+        {
+            Title = "두 번째 할 일",
+            IsDone = true
+        });
+
+        var viewModel = new MainWindowViewModel(storage);
+
+        viewModel.ClearAllCommand.Execute(null);
+
+        Assert.Empty(viewModel.Todos);
+        Assert.Equal(1, storage.SaveCallCount);
+        Assert.Empty(storage.LastSavedTodos);
+    }
+
+    [Fact]
+    public void ClearAllCommand_ClearsEditState()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var todo = new TodoItem
+        {
+            Title = "편집 중인 할 일"
+        };
+
+        storage.TodosToLoad.Add(todo);
+
+        var viewModel = new MainWindowViewModel(storage);
+
+        viewModel.StartEditCommand.Execute(todo);
+        viewModel.EditTodoTitle = "수정 중인 제목";
+
+        viewModel.ClearAllCommand.Execute(null);
+
+        Assert.Empty(viewModel.Todos);
+        Assert.Null(viewModel.EditingTodo);
+        Assert.Equal(string.Empty, viewModel.EditTodoTitle);
+        Assert.Equal(1, storage.SaveCallCount);
+    }
+
+    [Fact]
+    public void ClearAllCommand_CannotExecute_AfterTodosAreCleared()
+    {
+        var storage = new FakeTodoStorageService();
+
+        storage.TodosToLoad.Add(new TodoItem
+        {
+            Title = "삭제할 할 일"
+        });
+
+        var viewModel = new MainWindowViewModel(storage);
+
+        viewModel.ClearAllCommand.Execute(null);
+
+        Assert.False(viewModel.ClearAllCommand.CanExecute(null));
+    }
 }
