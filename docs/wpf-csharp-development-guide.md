@@ -103,6 +103,27 @@ JSON 자동 저장 단계에서는 앱의 할 일 목록을 메모리가 아니�
 
 XAML에서는 `SetFilterCommand`와 `CommandParameter`를 사용해 버튼에서 enum 값을 ViewModel로 전달했습니다. 선택된 필터 버튼을 강조할 때는 `DataTrigger`를 사용해 `SelectedFilter` 값에 따라 버튼 스타일을 바꾸었습니다.
 
+## 검색 기능 학습 메모
+
+검색 단계에서는 이미 만든 `TodosView.Filter` 안에 검색 조건을 함께 넣는 방식을 배웠습니다. 새 목록을 따로 만들지 않고, 원본 목록인 `Todos`는 유지한 채 화면에 표시되는 항목만 줄이는 구조입니다.
+
+이번 구현에서 배운 흐름은 다음과 같습니다.
+
+1. `SearchText` 속성으로 검색창 입력값을 ViewModel에서 관리한다.
+2. `OnSearchTextChanged()`에서 `TodosView.Refresh()`를 호출해 입력 즉시 목록을 다시 계산한다.
+3. `FilterTodo()`에서 완료/미완료 필터 조건을 먼저 확인한다.
+4. 필터 조건을 통과한 항목에 대해서만 제목 검색 조건을 적용한다.
+5. `StringComparison.OrdinalIgnoreCase`를 사용해 대소문자를 구분하지 않고 검색한다.
+6. `ClearSearchCommand`로 검색어를 빈 문자열로 바꾸고, 기존 변경 감지 흐름을 통해 목록을 갱신한다.
+
+검색 조건과 완료 필터는 서로 따로 동작하는 것이 아니라 함께 적용됩니다.
+
+- `SelectedFilter = TodoFilter.All`, `SearchText = "wpf"`: 제목에 `wpf`가 들어간 모든 항목 표시
+- `SelectedFilter = TodoFilter.Active`, `SearchText = "wpf"`: 진행 중 항목 중 제목에 `wpf`가 들어간 항목 표시
+- `SelectedFilter = TodoFilter.Completed`, `SearchText = ""`: 완료된 모든 항목 표시
+
+핵심은 `FilterTodo()`가 하나의 항목에 대해 “현재 필터 조건에도 맞고, 검색어 조건에도 맞는가?”를 판단한다는 점입니다.
+
 ## 실행과 빌드
 
 프로젝트 폴더에서 다음 명령을 사용할 수 있습니다.
@@ -131,8 +152,8 @@ Visual Studio에서는 `TodoWpf.slnx` 또는 `TodoWpf.csproj`를 열고 `F5`로 
 
 ## 다음 실습 후보
 
-1. 검색 기능
-2. ViewModel 단위 테스트
-3. 스타일과 리소스 딕셔너리 분리
+1. ViewModel 단위 테스트
+2. 스타일과 리소스 딕셔너리 분리
+3. 할 일 수정 기능
 
 기능을 추가할 때는 한 번에 많은 구조를 바꾸기보다, ViewModel 속성 하나, Command 하나, XAML 바인딩 하나처럼 작은 단위로 이해하면서 확장하는 것을 권장합니다.

@@ -17,6 +17,9 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private TodoFilter selectedFilter = TodoFilter.All;
 
+    [ObservableProperty]
+    private string searchText = string.Empty;
+
     private readonly TodoStorageService storageService = new();
 
     public ObservableCollection<TodoItem> Todos { get; } = new();
@@ -81,19 +84,33 @@ public partial class MainWindowViewModel : ObservableObject
         if (item is not TodoItem todo)
             return false;
 
-        return SelectedFilter switch
+        var matchesFilter = SelectedFilter switch
         {
             TodoFilter.All => true,
             TodoFilter.Active => !todo.IsDone,
             TodoFilter.Completed => todo.IsDone,
             _ => true
         };
+
+        if (!matchesFilter)
+            return false;
+
+        if (string.IsNullOrWhiteSpace(SearchText))
+            return true;
+
+        return todo.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
     }
 
     private bool CanAddTodo()
     {
         return !string.IsNullOrWhiteSpace(NewTodoTitle);
     }
+
+    partial void OnSearchTextChanged(string value)
+    {
+        TodosView.Refresh();
+    }
+
 
     [RelayCommand(CanExecute = nameof(CanAddTodo))]
     private void AddTodo()
@@ -127,5 +144,11 @@ public partial class MainWindowViewModel : ObservableObject
     private void SetFilter(TodoFilter filter)
     {
         SelectedFilter = filter;
+    }
+
+    [RelayCommand]
+    private void ClearSearch()
+    {
+        SearchText = string.Empty;
     }
 }
