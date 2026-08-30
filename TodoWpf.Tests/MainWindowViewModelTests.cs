@@ -266,4 +266,120 @@ public class MainWindowViewModelTests
 
         Assert.Equal(string.Empty, viewModel.SearchText);
     }
+
+    [Fact]
+    public void StartEditCommand_SetsEditingTodoAndEditTitle()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var todo = new TodoItem
+        {
+            Title = "수정 전 할 일"
+        };
+
+        storage.TodosToLoad.Add(todo);
+
+        var viewModel = new MainWindowViewModel(storage);
+
+        viewModel.StartEditCommand.Execute(todo);
+
+        Assert.Same(todo, viewModel.EditingTodo);
+        Assert.Equal("수정 전 할 일", viewModel.EditTodoTitle);
+    }
+
+    [Fact]
+    public void SaveEditCommand_UpdatesTodoTitleAndClearsEditState()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var todo = new TodoItem
+        {
+            Title = "수정 전 할 일"
+        };
+
+        storage.TodosToLoad.Add(todo);
+
+        var viewModel = new MainWindowViewModel(storage);
+
+        viewModel.StartEditCommand.Execute(todo);
+        viewModel.EditTodoTitle = "수정 후 할 일";
+
+        viewModel.SaveEditCommand.Execute(null);
+
+        Assert.Equal("수정 후 할 일", todo.Title);
+        Assert.Null(viewModel.EditingTodo);
+        Assert.Equal(string.Empty, viewModel.EditTodoTitle);
+        Assert.Equal(1, storage.SaveCallCount);
+        Assert.Equal("수정 후 할 일", storage.LastSavedTodos[0].Title);
+    }
+
+    [Fact]
+    public void CancelEditCommand_ClearsEditStateWithoutChangingTodo()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var todo = new TodoItem
+        {
+            Title = "수정 전 할 일"
+        };
+
+        storage.TodosToLoad.Add(todo);
+
+        var viewModel = new MainWindowViewModel(storage);
+
+        viewModel.StartEditCommand.Execute(todo);
+        viewModel.EditTodoTitle = "수정하려던 제목";
+
+        viewModel.CancelEditCommand.Execute(null);
+
+        Assert.Equal("수정 전 할 일", todo.Title);
+        Assert.Null(viewModel.EditingTodo);
+        Assert.Equal(string.Empty, viewModel.EditTodoTitle);
+        Assert.Equal(0, storage.SaveCallCount);
+    }
+
+    [Fact]
+    public void SaveEditCommand_CannotExecute_WhenEditTitleIsWhiteSpace()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var todo = new TodoItem
+        {
+            Title = "수정 전 할 일"
+        };
+
+        storage.TodosToLoad.Add(todo);
+
+        var viewModel = new MainWindowViewModel(storage);
+
+        viewModel.StartEditCommand.Execute(todo);
+        viewModel.EditTodoTitle = "   ";
+
+        Assert.False(viewModel.SaveEditCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void RemoveTodoCommand_ClearsEditState_WhenRemovingEditingTodo()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var todo = new TodoItem
+        {
+            Title = "삭제할 편집 중 할 일"
+        };
+
+        storage.TodosToLoad.Add(todo);
+
+        var viewModel = new MainWindowViewModel(storage);
+
+        viewModel.StartEditCommand.Execute(todo);
+        viewModel.EditTodoTitle = "수정 중인 제목";
+
+        viewModel.RemoveTodoCommand.Execute(todo);
+
+        Assert.DoesNotContain(todo, viewModel.Todos);
+        Assert.Null(viewModel.EditingTodo);
+        Assert.Equal(string.Empty, viewModel.EditTodoTitle);
+        Assert.Equal(1, storage.SaveCallCount);
+    }
 }

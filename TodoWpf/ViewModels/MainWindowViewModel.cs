@@ -20,6 +20,15 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private string searchText = string.Empty;
 
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SaveEditCommand))]
+    private TodoItem? editingTodo;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SaveEditCommand))]
+    private string editTodoTitle = string.Empty;
+
+
     private readonly ITodoStorageService storageService;
 
     public ObservableCollection<TodoItem> Todos { get; } = new();
@@ -113,6 +122,13 @@ public partial class MainWindowViewModel : ObservableObject
         return !string.IsNullOrWhiteSpace(NewTodoTitle);
     }
 
+    private bool CanSaveEdit()
+    {
+        return EditingTodo is not null
+            && !string.IsNullOrWhiteSpace(EditTodoTitle);
+    }
+
+
     partial void OnSearchTextChanged(string value)
     {
         TodosView.Refresh();
@@ -139,12 +155,17 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void RemoveTodo(TodoItem? item)
     {
-        if (item is not null)
-        {
-            RemoveTodoItem(item);
+        if (item is null)
+            return;
 
-            SaveTodos();
+        if (ReferenceEquals(EditingTodo, item))
+        {
+            EditingTodo = null;
+            EditTodoTitle = string.Empty;
         }
+
+        RemoveTodoItem(item);
+        SaveTodos();
     }
 
     [RelayCommand]
@@ -157,5 +178,34 @@ public partial class MainWindowViewModel : ObservableObject
     private void ClearSearch()
     {
         SearchText = string.Empty;
+    }
+
+    [RelayCommand]
+    private void StartEdit(TodoItem? item)
+    {
+        if (item is null)
+            return;
+
+        EditingTodo = item;
+        EditTodoTitle = item.Title;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSaveEdit))]
+    private void SaveEdit()
+    {
+        if (EditingTodo is null)
+            return;
+
+        EditingTodo.Title = EditTodoTitle.Trim();
+
+        EditingTodo = null;
+        EditTodoTitle = string.Empty;
+    }
+
+    [RelayCommand]
+    private void CancelEdit()
+    {
+        EditingTodo = null;
+        EditTodoTitle = string.Empty;
     }
 }

@@ -18,6 +18,7 @@ WPF와 MVVM 패턴을 학습하기 위한 간단한 할 일 관리 앱입니다.
 - 체크박스로 완료 상태 변경
 - 완료된 항목에 취소선 표시
 - 삭제 버튼으로 할 일 제거
+- 할 일 제목 수정, 저장, 취소
 - 할 일 목록 JSON 자동 저장 및 앱 시작 시 불러오기
 - 전체 / 진행 중 / 완료 필터
 - 할 일 제목 검색 및 검색어 초기화
@@ -85,7 +86,7 @@ cd D:\Dev\WPF\learning-wpf-todolist
 dotnet test
 ```
 
-현재 테스트는 `MainWindowViewModel`을 대상으로 하며, 실제 JSON 파일을 쓰지 않도록 `FakeTodoStorageService`를 사용합니다.
+현재 테스트는 `MainWindowViewModel`을 대상으로 하며, 실제 JSON 파일을 쓰지 않도록 `FakeTodoStorageService`를 사용합니다. 추가, 삭제, 저장, 필터, 검색, 수정 시작, 수정 저장, 수정 취소 동작을 검증합니다.
 
 ## 사용 기술
 
@@ -101,7 +102,6 @@ dotnet test
 
 ## 다음 학습 과제
 
-- 할 일 수정 기능 추가
 - 전체 삭제 또는 완료 항목 삭제 기능 추가
 - ViewModel Locator 또는 의존성 주입 적용
 
