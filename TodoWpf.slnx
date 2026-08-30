@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="TodoWpf.Tests/TodoWpf.Tests.csproj" />
   <Project Path="TodoWpf/TodoWpf.csproj" />
 </Solution>

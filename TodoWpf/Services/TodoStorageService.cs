@@ -4,7 +4,14 @@ using TodoWpf.Models;
 
 namespace TodoWpf.Services;
 
-public class TodoStorageService
+public interface ITodoStorageService
+{
+    List<TodoItem> Load();
+
+    void Save(IEnumerable<TodoItem> todos);
+}
+
+public class TodoStorageService : ITodoStorageService
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {

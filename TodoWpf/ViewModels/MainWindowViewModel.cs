@@ -20,15 +20,22 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private string searchText = string.Empty;
 
-    private readonly TodoStorageService storageService = new();
+    private readonly ITodoStorageService storageService;
 
     public ObservableCollection<TodoItem> Todos { get; } = new();
 
     public ICollectionView TodosView { get; }
 
-    // Constructor
+
     public MainWindowViewModel()
+    : this(new TodoStorageService())
     {
+    }
+
+    public MainWindowViewModel(ITodoStorageService storageService)
+    {
+        this.storageService = storageService;
+
         // load file
         var savedTodos = storageService.Load();
 
