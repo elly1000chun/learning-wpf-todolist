@@ -2,38 +2,53 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:TodoWpf.ViewModels">
 
+    <SolidColorBrush x:Key="TodoTextBrush" Color="#222222"/>
+    <SolidColorBrush x:Key="CompletedTodoTextBrush" Color="#808080"/>
+    <SolidColorBrush x:Key="FilterButtonBackgroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="SelectedFilterButtonBackgroundBrush" Color="#DDEBFF"/>
+    <SolidColorBrush x:Key="DeleteButtonForegroundBrush" Color="#B00020"/>
+
+    <Thickness x:Key="InputTextBoxMargin">0,0,8,0</Thickness>
+    <Thickness x:Key="InputTextBoxPadding">10,7</Thickness>
+    <Thickness x:Key="FilterButtonPadding">12,5</Thickness>
+    <Thickness x:Key="SmallButtonPadding">12,5</Thickness>
+    <Thickness x:Key="AddButtonPadding">18,7</Thickness>
+    <Thickness x:Key="DeleteButtonPadding">10,4</Thickness>
+    <Thickness x:Key="TodoItemPadding">4</Thickness>
+    <Thickness x:Key="TodoCheckBoxMargin">4,0,10,0</Thickness>
+
     <Style x:Key="TodoTitleTextBlockStyle" TargetType="TextBlock">
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="FontSize" Value="15"/>
-        <Setter Property="Foreground" Value="#222222"/>
+        <Setter Property="Foreground" Value="{StaticResource TodoTextBrush}"/>
 
         <Style.Triggers>
             <DataTrigger Binding="{Binding IsDone}" Value="True">
-                <Setter Property="Foreground" Value="Gray"/>
+                <Setter Property="Foreground" Value="{StaticResource CompletedTodoTextBrush}"/>
                 <Setter Property="TextDecorations" Value="Strikethrough"/>
             </DataTrigger>
         </Style.Triggers>
     </Style>
 
     <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
-        <Setter Property="Margin" Value="0,0,8,0"/>
-        <Setter Property="Padding" Value="10,7"/>
+        <Setter Property="Margin" Value="{StaticResource InputTextBoxMargin}"/>
+        <Setter Property="Padding" Value="{StaticResource InputTextBoxPadding}"/>
         <Setter Property="FontSize" Value="15"/>
     </Style>
 
     <Style x:Key="FilterButtonBaseStyle" TargetType="Button">
-        <Setter Property="Padding" Value="12,5"/>
-        <Setter Property="Background" Value="White"/>
+        <Setter Property="Padding" Value="{StaticResource FilterButtonPadding}"/>
+        <Setter Property="Background" Value="{StaticResource FilterButtonBackgroundBrush}"/>
         <Setter Property="FontWeight" Value="Normal"/>
     </Style>
     
     <Style x:Key="AllFilterButtonStyle"
-       TargetType="Button"
-       BasedOn="{StaticResource FilterButtonBaseStyle}">
+           TargetType="Button"
+           BasedOn="{StaticResource FilterButtonBaseStyle}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding SelectedFilter}"
                          Value="{x:Static vm:TodoFilter.All}">
-                <Setter Property="Background" Value="#DDEBFF"/>
+                <Setter Property="Background" Value="{StaticResource SelectedFilterButtonBackgroundBrush}"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
             </DataTrigger>
         </Style.Triggers>
@@ -45,7 +60,7 @@
         <Style.Triggers>
             <DataTrigger Binding="{Binding SelectedFilter}"
                          Value="{x:Static vm:TodoFilter.Active}">
-                <Setter Property="Background" Value="#DDEBFF"/>
+                <Setter Property="Background" Value="{StaticResource SelectedFilterButtonBackgroundBrush}"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
             </DataTrigger>
         </Style.Triggers>
@@ -57,7 +72,7 @@
         <Style.Triggers>
             <DataTrigger Binding="{Binding SelectedFilter}"
                          Value="{x:Static vm:TodoFilter.Completed}">
-                <Setter Property="Background" Value="#DDEBFF"/>
+                <Setter Property="Background" Value="{StaticResource SelectedFilterButtonBackgroundBrush}"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
             </DataTrigger>
         </Style.Triggers>
@@ -66,19 +81,30 @@
 
     <Style x:Key="TodoListBoxItemStyle" TargetType="ListBoxItem">
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-        <Setter Property="Padding" Value="4"/>
+        <Setter Property="Padding" Value="{StaticResource TodoItemPadding}"/>
     </Style>
 
-    <Style x:Key="AddButtonStyle" TargetType="Button">
-        <Setter Property="Padding" Value="18,7"/>
+    <Style x:Key="ActionButtonBaseStyle" TargetType="Button">
+        <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
 
-    <Style x:Key="SmallButtonStyle" TargetType="Button">
-        <Setter Property="Padding" Value="12,5"/>
+    <Style x:Key="AddButtonStyle"
+           TargetType="Button"
+           BasedOn="{StaticResource ActionButtonBaseStyle}">
+        <Setter Property="Padding" Value="{StaticResource AddButtonPadding}"/>
     </Style>
 
-    <Style x:Key="DeleteButtonStyle" TargetType="Button">
-        <Setter Property="Padding" Value="10,4"/>
+    <Style x:Key="SmallButtonStyle"
+           TargetType="Button"
+           BasedOn="{StaticResource ActionButtonBaseStyle}">
+        <Setter Property="Padding" Value="{StaticResource SmallButtonPadding}"/>
+    </Style>
+
+    <Style x:Key="DeleteButtonStyle"
+           TargetType="Button"
+           BasedOn="{StaticResource ActionButtonBaseStyle}">
+        <Setter Property="Padding" Value="{StaticResource DeleteButtonPadding}"/>
+        <Setter Property="Foreground" Value="{StaticResource DeleteButtonForegroundBrush}"/>
     </Style>
 
     <Style x:Key="EditPanelStyle" TargetType="Grid">
@@ -101,7 +127,7 @@
             </Grid.ColumnDefinitions>
 
             <CheckBox Grid.Column="0"
-                      Margin="4,0,10,0"
+                      Margin="{StaticResource TodoCheckBoxMargin}"
                       VerticalAlignment="Center"
                       IsChecked="{Binding IsDone}"/>
 
@@ -112,13 +138,13 @@
                     Style="{StaticResource SmallButtonStyle}"
                     Content="수정"
                     Command="{Binding DataContext.StartEditCommand,
-                    RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                      RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                     CommandParameter="{Binding}"/>
             <Button Grid.Column="3"
                     Style="{StaticResource DeleteButtonStyle}"
                     Content="삭제"
                     Command="{Binding DataContext.RemoveTodoCommand,
-                    RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                      RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                     CommandParameter="{Binding}"/>
         </Grid>
     </DataTemplate>

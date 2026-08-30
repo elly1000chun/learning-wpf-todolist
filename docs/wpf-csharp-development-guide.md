@@ -184,6 +184,35 @@ XAML에서는 `SetFilterCommand`와 `CommandParameter`를 사용해 버튼에서
 
 핵심은 View인 `MainWindow.xaml`에는 화면 배치와 바인딩을 주로 남기고, 반복되는 시각 표현은 `TodoStyles.xaml`로 옮기는 것입니다. 이렇게 해두면 화면이 커져도 스타일을 한 곳에서 관리할 수 있습니다.
 
+## 스타일 리소스 심화 학습 메모
+
+스타일 리소스 심화 단계에서는 스타일 안에 직접 적혀 있던 색상과 간격 값을 이름 있는 리소스로 분리했습니다.
+
+이번 구현에서 배운 흐름은 다음과 같습니다.
+
+1. 반복해서 쓰는 색상을 `SolidColorBrush` 리소스로 정의한다.
+2. 반복해서 쓰는 여백과 패딩을 `Thickness` 리소스로 정의한다.
+3. 스타일의 `Foreground`, `Background`, `Margin`, `Padding` 값에서 직접 숫자나 색상 코드를 쓰지 않고 `StaticResource`를 참조한다.
+4. `DataTemplate` 내부의 체크박스 여백처럼 항목 안에서 쓰는 값도 리소스로 분리한다.
+5. 긴 `Binding` 표현은 줄을 나누고 들여쓰기를 맞춰 XAML 구조를 읽기 쉽게 정리한다.
+6. 여러 버튼 스타일에서 공유할 설정은 `ActionButtonBaseStyle` 같은 기본 스타일로 만들고 `BasedOn`으로 확장한다.
+7. 삭제처럼 의미가 강한 동작은 전용 색상 리소스를 만들어 일반 버튼과 구분한다.
+8. 마지막으로 리소스, 스타일, 템플릿이 역할별로 읽히는지 전체 구조를 점검한다.
+
+이번 단계에서 분리한 주요 리소스는 다음과 같습니다.
+
+- `TodoTextBrush`: 기본 할 일 제목 색상
+- `CompletedTodoTextBrush`: 완료된 할 일 제목 색상
+- `FilterButtonBackgroundBrush`: 필터 버튼 기본 배경색
+- `SelectedFilterButtonBackgroundBrush`: 선택된 필터 버튼 배경색
+- `DeleteButtonForegroundBrush`: 삭제 버튼 글자색
+- `InputTextBoxMargin`, `InputTextBoxPadding`: 입력창 여백과 안쪽 여백
+- `FilterButtonPadding`, `SmallButtonPadding`, `AddButtonPadding`, `DeleteButtonPadding`: 버튼 종류별 안쪽 여백
+- `TodoItemPadding`: 목록 항목의 안쪽 여백
+- `TodoCheckBoxMargin`: 목록 항목 안에서 체크박스와 제목 사이의 여백
+
+핵심은 스타일의 세부 값을 “그때그때 적는 값”이 아니라 “의미 있는 이름을 가진 리소스”로 관리하는 것입니다. 이렇게 하면 색상이나 간격을 바꿀 때 여러 XAML 요소를 찾아다니지 않고 리소스 값만 수정할 수 있습니다.
+
 ## 할 일 수정 기능 학습 메모
 
 할 일 수정 단계에서는 기존 항목을 바로 바꾸지 않고, 먼저 편집 상태와 편집용 입력값을 ViewModel에 따로 두는 방식을 배웠습니다.
@@ -320,12 +349,12 @@ Visual Studio에서는 `TodoWpf.slnx` 또는 `TodoWpf.csproj`를 열고 `F5`로 
 11. 완료 항목 삭제와 전체 삭제
 12. 입력 포커스와 키보드 사용성 개선
 13. 의존성 주입과 서비스 계층 분리
-14. 게시, 설치 파일, MSIX 배포
+14. 스타일 리소스 심화
+15. 게시, 설치 파일, MSIX 배포
 
 ## 다음 실습 후보
 
-1. 스타일 리소스 심화
-2. 게시, 설치 파일, MSIX 배포
-3. 설정 화면 또는 사용자 옵션 저장
+1. 게시, 설치 파일, MSIX 배포
+2. 설정 화면 또는 사용자 옵션 저장
 
 기능을 추가할 때는 한 번에 많은 구조를 바꾸기보다, ViewModel 속성 하나, Command 하나, XAML 바인딩 하나처럼 작은 단위로 이해하면서 확장하는 것을 권장합니다.
