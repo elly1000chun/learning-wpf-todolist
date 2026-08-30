@@ -55,6 +55,7 @@ WPF에서는 화면 구조와 스타일을 XAML로 선언하고, 화면에 연�
 | `ObservableObject` | 속성 변경을 UI에 알림 |
 | `[ObservableProperty]` | 바인딩 가능한 속성 자동 생성 |
 | `ObservableCollection<T>` | 목록 추가/삭제 시 UI 자동 갱신 |
+| `ICollectionView` | 원본 목록은 유지하면서 화면 표시 목록을 제어 |
 | `[RelayCommand]` | 버튼과 ViewModel 메서드 연결 |
 | `DataTemplate` | 목록 항목의 표시 방식 정의 |
 | `DataTrigger` | 완료 여부에 따라 스타일 변경 |
@@ -78,6 +79,29 @@ JSON 자동 저장 단계에서는 앱의 할 일 목록을 메모리가 아니�
 - 체크박스로 완료 상태를 바꿀 때
 
 저장 파일은 사용자 로컬 앱 데이터 폴더 아래의 `TodoWpf\todos.json`입니다. 이 파일은 사용자별 실행 데이터이므로 Git에 포함하지 않습니다.
+
+## 완료/미완료 필터 학습 메모
+
+필터 단계에서는 원본 할 일 목록인 `Todos`를 직접 지우거나 다시 만들지 않고, 화면에 표시되는 목록만 바꾸는 방식을 배웠습니다.
+
+이번 구현에서 배운 흐름은 다음과 같습니다.
+
+1. `TodoFilter` enum으로 `All`, `Active`, `Completed` 필터 상태를 정의한다.
+2. `SelectedFilter` 속성으로 현재 선택된 필터를 ViewModel에서 관리한다.
+3. `CollectionViewSource.GetDefaultView(Todos)`로 `TodosView`를 만든다.
+4. `TodosView.Filter`에 `FilterTodo()` 메서드를 연결한다.
+5. 필터 버튼은 `SetFilterCommand`를 통해 `SelectedFilter`만 변경한다.
+6. `SelectedFilter`가 바뀌면 `TodosView.Refresh()`를 호출해 화면 목록을 다시 계산한다.
+7. 체크박스로 `IsDone`이 바뀔 때도 `TodosView.Refresh()`를 호출해 현재 필터 결과가 즉시 반영되게 한다.
+
+핵심은 “데이터 원본”과 “화면에 보이는 목록”을 분리하는 것입니다.
+
+- `Todos`: 실제 할 일 데이터 전체
+- `TodosView`: 현재 필터 조건에 따라 화면에 표시되는 목록
+- `SelectedFilter`: 사용자가 선택한 필터 상태
+- `FilterTodo()`: 항목 하나를 화면에 보여줄지 판단하는 조건
+
+XAML에서는 `SetFilterCommand`와 `CommandParameter`를 사용해 버튼에서 enum 값을 ViewModel로 전달했습니다. 선택된 필터 버튼을 강조할 때는 `DataTrigger`를 사용해 `SelectedFilter` 값에 따라 버튼 스타일을 바꾸었습니다.
 
 ## 실행과 빌드
 
@@ -107,9 +131,8 @@ Visual Studio에서는 `TodoWpf.slnx` 또는 `TodoWpf.csproj`를 열고 `F5`로 
 
 ## 다음 실습 후보
 
-1. 완료/미완료 필터
-2. 검색 기능
-3. ViewModel 단위 테스트
-4. 스타일과 리소스 딕셔너리 분리
+1. 검색 기능
+2. ViewModel 단위 테스트
+3. 스타일과 리소스 딕셔너리 분리
 
 기능을 추가할 때는 한 번에 많은 구조를 바꾸기보다, ViewModel 속성 하나, Command 하나, XAML 바인딩 하나처럼 작은 단위로 이해하면서 확장하는 것을 권장합니다.

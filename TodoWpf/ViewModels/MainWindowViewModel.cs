@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using TodoWpf.Models;
 using TodoWpf.Services;
 using System.ComponentModel;
+using System.Windows.Data;
 
 namespace TodoWpf.ViewModels;
 
@@ -12,9 +13,15 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(AddTodoCommand))]
     private string newTodoTitle = string.Empty;
+
+    [ObservableProperty]
+    private TodoFilter selectedFilter = TodoFilter.All;
+
     private readonly TodoStorageService storageService = new();
 
     public ObservableCollection<TodoItem> Todos { get; } = new();
+
+    public ICollectionView TodosView { get; }
 
     // Constructor
     public MainWindowViewModel()
@@ -28,19 +35,23 @@ public partial class MainWindowViewModel : ObservableObject
             {
                 Title = "Studying WPF data binding"
             });
-
-            return;
         }
-
-        foreach (var todo in savedTodos)
+        else
         {
-            AddTodoItem(todo);
+            foreach (var todo in savedTodos)
+            {
+                AddTodoItem(todo);
+            }
         }
+
+        TodosView = CollectionViewSource.GetDefaultView(Todos);
+        TodosView.Filter = FilterTodo;
     }
 
     private void OnTodoItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         SaveTodos();
+        TodosView.Refresh();
     }
 
     private void AddTodoItem(TodoItem item)
@@ -58,6 +69,25 @@ public partial class MainWindowViewModel : ObservableObject
     private void SaveTodos()
     {
         storageService.Save(Todos);
+    }
+
+    partial void OnSelectedFilterChanged(TodoFilter value)
+    {
+        TodosView.Refresh();
+    }
+
+    private bool FilterTodo(object item)
+    {
+        if (item is not TodoItem todo)
+            return false;
+
+        return SelectedFilter switch
+        {
+            TodoFilter.All => true,
+            TodoFilter.Active => !todo.IsDone,
+            TodoFilter.Completed => todo.IsDone,
+            _ => true
+        };
     }
 
     private bool CanAddTodo()
@@ -91,5 +121,11 @@ public partial class MainWindowViewModel : ObservableObject
 
             SaveTodos();
         }
+    }
+
+    [RelayCommand]
+    private void SetFilter(TodoFilter filter)
+    {
+        SelectedFilter = filter;
     }
 }
