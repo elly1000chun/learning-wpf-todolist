@@ -22,6 +22,7 @@ WPF와 MVVM 패턴을 학습하기 위한 간단한 할 일 관리 앱입니다.
 - 전체 / 진행 중 / 완료 필터
 - 할 일 제목 검색 및 검색어 초기화
 - ViewModel 단위 테스트
+- 스타일과 리소스 딕셔너리 분리
 
 ## 프로젝트 구조
 
@@ -36,6 +37,8 @@ learning-wpf-todolist/
 │  │  └─ TodoItems.cs
 │  ├─ Services/
 │  │  └─ TodoStorageService.cs
+│  ├─ Styles/
+│  │  └─ TodoStyles.xaml
 │  ├─ ViewModels/
 │  │  ├─ MainWindowViewModel.cs
 │  │  └─ TodoFilter.cs
@@ -55,6 +58,7 @@ learning-wpf-todolist/
 - `ViewModels/TodoFilter.cs`: 전체, 진행 중, 완료 필터 값을 정의합니다.
 - `Models/TodoItems.cs`: 할 일 항목의 데이터와 변경 알림 속성을 정의합니다.
 - `Services/TodoStorageService.cs`: 할 일 목록을 JSON 파일로 저장하고 불러옵니다.
+- `Styles/TodoStyles.xaml`: 화면에서 재사용하는 스타일과 할 일 항목 템플릿을 정의합니다.
 - `TodoWpf.Tests/MainWindowViewModelTests.cs`: ViewModel의 추가, 삭제, 저장, 필터, 검색 동작을 검증합니다.
 - `TodoWpf.csproj`: WPF, .NET, NuGet 패키지 설정을 관리합니다.
 
@@ -99,7 +103,6 @@ dotnet test
 
 - 할 일 수정 기능 추가
 - 전체 삭제 또는 완료 항목 삭제 기능 추가
-- 스타일과 리소스 딕셔너리 분리
 - ViewModel Locator 또는 의존성 주입 적용
 
 ## 메모

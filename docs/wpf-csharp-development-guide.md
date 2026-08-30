@@ -59,6 +59,7 @@ WPF에서는 화면 구조와 스타일을 XAML로 선언하고, 화면에 연�
 | `[RelayCommand]` | 버튼과 ViewModel 메서드 연결 |
 | `DataTemplate` | 목록 항목의 표시 방식 정의 |
 | `DataTrigger` | 완료 여부에 따라 스타일 변경 |
+| `ResourceDictionary` | 스타일과 템플릿 같은 리소스를 별도 파일로 분리 |
 | 단위 테스트 | ViewModel 동작을 UI 실행 없이 검증 |
 
 ## JSON 자동 저장 학습 메모
@@ -154,6 +155,33 @@ XAML에서는 `SetFilterCommand`와 `CommandParameter`를 사용해 버튼에서
 
 핵심은 “테스트하기 어려운 실제 파일 저장”을 ViewModel 밖으로 밀어내고, 테스트에서는 가짜 저장소를 넣어 ViewModel의 판단만 검증하는 것입니다. 이것이 의존성 주입을 사용하는 중요한 이유 중 하나입니다.
 
+## 스타일과 리소스 딕셔너리 학습 메모
+
+스타일 분리 단계에서는 `MainWindow.xaml` 안에 직접 적혀 있던 반복 UI 설정을 별도 리소스로 옮겼습니다.
+
+이번 구현에서 배운 흐름은 다음과 같습니다.
+
+1. `Window.Resources`에 이름 있는 `Style`을 만들고 `StaticResource`로 사용한다.
+2. 반복되는 `TextBox` 속성을 `InputTextBoxStyle`로 분리한다.
+3. 필터 버튼의 기본 모양을 `FilterButtonBaseStyle`로 만들고 `BasedOn`으로 확장한다.
+4. `ListBoxItem` 컨테이너 스타일을 `TodoListBoxItemStyle`로 분리한다.
+5. `Styles/TodoStyles.xaml` 파일을 만들고 스타일들을 `ResourceDictionary`로 옮긴다.
+6. `App.xaml`의 `Application.Resources`에서 `MergedDictionaries`로 스타일 파일을 전역 연결한다.
+7. 할 일 한 줄 UI를 `TodoItemTemplate`이라는 `DataTemplate` 리소스로 분리한다.
+8. 추가, 검색 초기화, 삭제 버튼의 크기 설정을 각각 스타일로 분리한다.
+
+이번 단계에서 분리한 주요 리소스는 다음과 같습니다.
+
+- `InputTextBoxStyle`: 새 할 일 입력창과 검색창의 공통 모양
+- `FilterButtonBaseStyle`: 필터 버튼의 기본 모양
+- `AllFilterButtonStyle`, `ActiveFilterButtonStyle`, `CompletedFilterButtonStyle`: 선택된 필터 버튼 강조
+- `TodoListBoxItemStyle`: 목록 항목 컨테이너 정렬과 여백
+- `TodoTitleTextBlockStyle`: 완료된 할 일의 회색 글자와 취소선
+- `TodoItemTemplate`: 할 일 한 줄의 체크박스, 제목, 삭제 버튼 구조
+- `AddButtonStyle`, `SmallButtonStyle`, `DeleteButtonStyle`: 버튼별 여백
+
+핵심은 View인 `MainWindow.xaml`에는 화면 배치와 바인딩을 주로 남기고, 반복되는 시각 표현은 `TodoStyles.xaml`로 옮기는 것입니다. 이렇게 해두면 화면이 커져도 스타일을 한 곳에서 관리할 수 있습니다.
+
 ## 실행과 빌드
 
 앱 프로젝트 폴더에서 다음 명령을 사용할 수 있습니다.
@@ -184,13 +212,14 @@ Visual Studio에서는 `TodoWpf.slnx` 또는 `TodoWpf.csproj`를 열고 `F5`로 
 6. 완료/미완료 필터
 7. 검색
 8. ViewModel 단위 테스트
-9. 의존성 주입과 서비스 계층 분리
-10. 게시, 설치 파일, MSIX 배포
+9. 스타일과 리소스 딕셔너리 분리
+10. 의존성 주입과 서비스 계층 분리
+11. 게시, 설치 파일, MSIX 배포
 
 ## 다음 실습 후보
 
-1. 스타일과 리소스 딕셔너리 분리
-2. 할 일 수정 기능
-3. 전체 삭제 또는 완료 항목 삭제 기능
+1. 할 일 수정 기능
+2. 전체 삭제 또는 완료 항목 삭제 기능
+3. 의존성 주입과 서비스 계층 정리
 
 기능을 추가할 때는 한 번에 많은 구조를 바꾸기보다, ViewModel 속성 하나, Command 하나, XAML 바인딩 하나처럼 작은 단위로 이해하면서 확장하는 것을 권장합니다.
