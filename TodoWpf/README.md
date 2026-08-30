@@ -1,6 +1,6 @@
 # TodoWpf
 
-WPF와 MVVM 패턴을 학습하기 위한 간단한 할 일 관리 앱입니다. 현재 앱은 `CommunityToolkit.Mvvm`을 사용해 View, ViewModel, Model의 역할을 나누고, 데이터 바인딩과 커맨드 기반 UI 흐름을 연습할 수 있도록 구성되어 있습니다.
+WPF와 MVVM 패턴을 학습하기 위한 간단한 할 일 관리 앱입니다. 현재 앱은 `CommunityToolkit.Mvvm`과 `Microsoft.Extensions.DependencyInjection`을 사용해 View, ViewModel, Model, Service의 역할을 나누고, 데이터 바인딩과 커맨드 기반 UI 흐름을 연습할 수 있도록 구성되어 있습니다.
 
 ## 학습 목표
 
@@ -10,6 +10,7 @@ WPF와 MVVM 패턴을 학습하기 위한 간단한 할 일 관리 앱입니다.
 - MVVM에서 ViewModel이 UI 상태와 동작을 관리하는 방식 학습
 - `ObservableObject`, `[ObservableProperty]`, `[RelayCommand]` 사용법 익히기
 - `ObservableCollection<T>`를 이용한 목록 UI 갱신 이해
+- 생성자 주입을 통한 ViewModel과 Service 연결 이해
 
 ## 현재 기능
 
@@ -27,6 +28,7 @@ WPF와 MVVM 패턴을 학습하기 위한 간단한 할 일 관리 앱입니다.
 - 할 일 제목 검색 및 Esc/버튼으로 검색어 초기화
 - ViewModel 단위 테스트
 - 스타일과 리소스 딕셔너리 분리
+- DI 컨테이너를 통한 ViewModel과 Service 생성
 
 ## 프로젝트 구조
 
@@ -56,6 +58,8 @@ learning-wpf-todolist/
 
 ## 주요 파일
 
+- `App.xaml`: 앱 전역 리소스를 정의합니다.
+- `App.xaml.cs`: DI 컨테이너 구성, 앱 시작 시 `MainWindow` 생성, 앱 종료 시 컨테이너 정리를 담당합니다.
 - `MainWindow.xaml`: 화면 레이아웃과 바인딩을 정의합니다.
 - `MainWindow.xaml.cs`: Window 초기화, `DataContext` 설정, 입력 포커스와 키보드 사용성 처리를 담당합니다.
 - `ViewModels/MainWindowViewModel.cs`: 할 일 목록, 입력값, 추가/삭제/수정/필터/검색 명령을 관리합니다.
@@ -98,6 +102,7 @@ dotnet test
 - XAML
 - .NET `net10.0-windows`
 - CommunityToolkit.Mvvm `8.4.2`
+- Microsoft.Extensions.DependencyInjection `10.0.11`
 
 ## 학습 문서
 
@@ -105,8 +110,8 @@ dotnet test
 
 ## 다음 학습 과제
 
-- ViewModel Locator 또는 의존성 주입 적용
 - 스타일 리소스 심화
+- 게시, 설치 파일, MSIX 배포
 
 ## 메모
 

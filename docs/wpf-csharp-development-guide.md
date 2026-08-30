@@ -61,6 +61,7 @@ WPF에서는 화면 구조와 스타일을 XAML로 선언하고, 화면에 연�
 | `DataTrigger` | 완료 여부에 따라 스타일 변경 |
 | `ResourceDictionary` | 스타일과 템플릿 같은 리소스를 별도 파일로 분리 |
 | Code-behind | 포커스처럼 View에 가까운 화면 동작 처리 |
+| 의존성 주입 | 필요한 객체 생성을 한 곳에서 관리하고 생성자로 전달 |
 | 단위 테스트 | ViewModel 동작을 UI 실행 없이 검증 |
 
 ## JSON 자동 저장 학습 메모
@@ -258,6 +259,32 @@ XAML에서는 `SetFilterCommand`와 `CommandParameter`를 사용해 버튼에서
 
 핵심은 ViewModel이 앱의 상태와 명령을 관리하고, code-behind는 포커스처럼 화면 요소에 직접 닿아야 하는 작은 동작만 맡는 것입니다. 이렇게 나누면 MVVM 구조를 유지하면서도 실제 사용감은 훨씬 좋아집니다.
 
+## 의존성 주입과 서비스 계층 정리 학습 메모
+
+DI 단계에서는 View와 ViewModel이 필요한 객체를 직접 만들지 않고, 앱 시작 시 구성한 컨테이너에서 필요한 객체를 받아 쓰는 구조로 바꾸었습니다.
+
+이번 구현에서 배운 흐름은 다음과 같습니다.
+
+1. `Microsoft.Extensions.DependencyInjection` 패키지를 추가해 DI 컨테이너를 사용할 준비를 한다.
+2. `App.xaml`의 `StartupUri`를 제거해 WPF의 자동 창 생성을 끊는다.
+3. `App.xaml.cs`에서 `ServiceCollection`을 만들고 앱에 필요한 타입을 등록한다.
+4. `ITodoStorageService`는 `TodoStorageService`로 연결한다.
+5. `MainWindowViewModel`과 `MainWindow`를 DI 컨테이너에 등록한다.
+6. `OnStartup()`에서 `GetRequiredService<MainWindow>()`로 창을 꺼내고 `Show()`로 표시한다.
+7. `MainWindow`는 생성자로 `MainWindowViewModel`을 주입받아 `DataContext`에 연결한다.
+8. `MainWindowViewModel`의 기본 생성자를 제거해 `TodoStorageService`를 직접 만들지 않게 한다.
+9. `OnExit()`에서 `serviceProvider.Dispose()`를 호출해 앱 종료 시 컨테이너를 정리한다.
+
+이번 단계에서 확인한 주요 변화는 다음과 같습니다.
+
+- 앱 시작 흐름이 `StartupUri` 자동 생성에서 `App.xaml.cs`의 명시적 생성 흐름으로 바뀌었다.
+- `MainWindow`는 더 이상 `new MainWindowViewModel()`을 호출하지 않는다.
+- `MainWindowViewModel`은 더 이상 `new TodoStorageService()`를 호출하지 않는다.
+- 실제 앱에서는 DI 컨테이너가 `TodoStorageService`를 넣어준다.
+- 테스트에서는 여전히 `FakeTodoStorageService`를 직접 넣어 ViewModel을 검증할 수 있다.
+
+핵심은 “필요한 것을 직접 만들지 않고 생성자로 요구한다”는 점입니다. 이렇게 하면 객체 생성 책임이 `App`에 모이고, ViewModel은 어떤 저장 방식이 쓰이는지 몰라도 자기 역할에 집중할 수 있습니다.
+
 ## 실행과 빌드
 
 앱 프로젝트 폴더에서 다음 명령을 사용할 수 있습니다.
@@ -297,8 +324,8 @@ Visual Studio에서는 `TodoWpf.slnx` 또는 `TodoWpf.csproj`를 열고 `F5`로 
 
 ## 다음 실습 후보
 
-1. 의존성 주입과 서비스 계층 정리
-2. 스타일 리소스 심화
-3. 게시, 설치 파일, MSIX 배포
+1. 스타일 리소스 심화
+2. 게시, 설치 파일, MSIX 배포
+3. 설정 화면 또는 사용자 옵션 저장
 
 기능을 추가할 때는 한 번에 많은 구조를 바꾸기보다, ViewModel 속성 하나, Command 하나, XAML 바인딩 하나처럼 작은 단위로 이해하면서 확장하는 것을 권장합니다.

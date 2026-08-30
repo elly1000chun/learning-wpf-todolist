@@ -1,17 +1,21 @@
 ﻿using System.Windows;
-using TodoWpf.ViewModels;
 using System.Windows.Input;
+using TodoWpf.ViewModels;
 
 namespace TodoWpf;
 
 public partial class MainWindow : Window
 {
-    public MainWindow()
+    private readonly MainWindowViewModel viewModel;
+
+    public MainWindow(MainWindowViewModel viewModel)
     {
         InitializeComponent();
 
-        DataContext = new MainWindowViewModel();
+        this.viewModel = viewModel;
+        DataContext = viewModel;
     }
+
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
@@ -34,9 +38,6 @@ public partial class MainWindow : Window
 
     private void EditTodoTitleTextBox_KeyDown(object sender, KeyEventArgs e)
     {
-        if (DataContext is not MainWindowViewModel viewModel)
-            return;
-
         if (e.Key == Key.Enter && viewModel.SaveEditCommand.CanExecute(null))
         {
             viewModel.SaveEditCommand.Execute(null);
@@ -55,9 +56,6 @@ public partial class MainWindow : Window
 
     private void SearchTextBox_KeyDown(object sender, KeyEventArgs e)
     {
-        if (DataContext is not MainWindowViewModel viewModel)
-            return;
-
         if (e.Key != Key.Escape)
             return;
 

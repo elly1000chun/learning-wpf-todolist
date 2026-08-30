@@ -37,11 +37,6 @@ public partial class MainWindowViewModel : ObservableObject
     public ICollectionView TodosView { get; }
 
     // Constructors ---------------------------------
-    public MainWindowViewModel()
-    : this(new TodoStorageService())
-    {
-    }
-
     public MainWindowViewModel(ITodoStorageService storageService)
     {
         this.storageService = storageService;
