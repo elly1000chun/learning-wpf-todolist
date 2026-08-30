@@ -59,6 +59,7 @@ WPF에서는 화면 구조와 스타일을 XAML로 선언하고, 화면에 연�
 | `[RelayCommand]` | 버튼과 ViewModel 메서드 연결 |
 | `DataTemplate` | 목록 항목의 표시 방식 정의 |
 | `DataTrigger` | 완료 여부에 따라 스타일 변경 |
+| 단위 테스트 | ViewModel 동작을 UI 실행 없이 검증 |
 
 ## JSON 자동 저장 학습 메모
 
@@ -124,15 +125,51 @@ XAML에서는 `SetFilterCommand`와 `CommandParameter`를 사용해 버튼에서
 
 핵심은 `FilterTodo()`가 하나의 항목에 대해 “현재 필터 조건에도 맞고, 검색어 조건에도 맞는가?”를 판단한다는 점입니다.
 
+## ViewModel 단위 테스트 학습 메모
+
+단위 테스트 단계에서는 WPF 화면을 직접 실행하지 않고, `MainWindowViewModel`의 상태와 명령이 기대한 대로 동작하는지 확인했습니다.
+
+이번 구현에서 배운 흐름은 다음과 같습니다.
+
+1. 테스트 프로젝트 `TodoWpf.Tests`를 만들고 앱 프로젝트를 참조한다.
+2. 앱 프로젝트와 호환되도록 테스트 프로젝트도 `net10.0-windows`를 대상으로 설정한다.
+3. `ITodoStorageService` 인터페이스를 만들고, ViewModel이 구체 저장 클래스가 아니라 인터페이스에 의존하게 한다.
+4. 테스트에서는 실제 파일을 쓰는 `TodoStorageService` 대신 `FakeTodoStorageService`를 사용한다.
+5. `AddTodoCommand`, `RemoveTodoCommand`, `ClearSearchCommand`처럼 ViewModel 명령을 직접 실행해 결과를 검증한다.
+6. `TodosView`를 열거해 필터와 검색 결과가 화면에 표시될 목록과 일치하는지 확인한다.
+7. 체크박스로 바뀌는 `TodoItem.IsDone` 변경이 저장 호출로 이어지는지 확인한다.
+
+이번 테스트에서 확인한 주요 동작은 다음과 같습니다.
+
+- 저장된 할 일을 ViewModel 생성 시 불러온다.
+- 새 할 일을 추가하면 목록에 들어가고 저장된다.
+- 공백 제목은 추가되지 않는다.
+- 할 일을 삭제하면 목록에서 빠지고 저장된다.
+- `null` 삭제 요청은 아무 일도 하지 않는다.
+- 완료 상태가 바뀌면 자동 저장된다.
+- 완료/미완료 필터가 원본 목록을 지우지 않고 표시 목록만 바꾼다.
+- 검색어가 제목과 대소문자 구분 없이 매칭된다.
+- 완료 필터와 검색 조건이 함께 적용된다.
+- 검색 초기화 명령이 `SearchText`를 빈 문자열로 되돌린다.
+
+핵심은 “테스트하기 어려운 실제 파일 저장”을 ViewModel 밖으로 밀어내고, 테스트에서는 가짜 저장소를 넣어 ViewModel의 판단만 검증하는 것입니다. 이것이 의존성 주입을 사용하는 중요한 이유 중 하나입니다.
+
 ## 실행과 빌드
 
-프로젝트 폴더에서 다음 명령을 사용할 수 있습니다.
+앱 프로젝트 폴더에서 다음 명령을 사용할 수 있습니다.
 
 ```powershell
 cd D:\Dev\WPF\learning-wpf-todolist\TodoWpf
 dotnet restore
 dotnet build
 dotnet run
+```
+
+테스트는 프로젝트 루트에서 실행합니다.
+
+```powershell
+cd D:\Dev\WPF\learning-wpf-todolist
+dotnet test
 ```
 
 Visual Studio에서는 `TodoWpf.slnx` 또는 `TodoWpf.csproj`를 열고 `F5`로 실행할 수 있습니다.
@@ -152,8 +189,8 @@ Visual Studio에서는 `TodoWpf.slnx` 또는 `TodoWpf.csproj`를 열고 `F5`로 
 
 ## 다음 실습 후보
 
-1. ViewModel 단위 테스트
-2. 스타일과 리소스 딕셔너리 분리
-3. 할 일 수정 기능
+1. 스타일과 리소스 딕셔너리 분리
+2. 할 일 수정 기능
+3. 전체 삭제 또는 완료 항목 삭제 기능
 
 기능을 추가할 때는 한 번에 많은 구조를 바꾸기보다, ViewModel 속성 하나, Command 하나, XAML 바인딩 하나처럼 작은 단위로 이해하면서 확장하는 것을 권장합니다.

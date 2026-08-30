@@ -162,4 +162,108 @@ public class MainWindowViewModelTests
         Assert.Single(visibleTodos);
         Assert.Equal("완료된 할 일", visibleTodos[0].Title);
     }
+
+    [Fact]
+    public void SelectedFilter_Active_ShowsOnlyActiveTodos()
+    {
+        var storage = new FakeTodoStorageService();
+
+        storage.TodosToLoad.Add(new TodoItem
+        {
+            Title = "진행 중 할 일",
+            IsDone = false
+        });
+
+        storage.TodosToLoad.Add(new TodoItem
+        {
+            Title = "완료된 할 일",
+            IsDone = true
+        });
+
+        var viewModel = new MainWindowViewModel(storage);
+
+        viewModel.SelectedFilter = TodoFilter.Active;
+
+        var visibleTodos = viewModel.TodosView.Cast<TodoItem>().ToList();
+
+        Assert.Single(visibleTodos);
+        Assert.Equal("진행 중 할 일", visibleTodos[0].Title);
+        Assert.Equal(2, viewModel.Todos.Count);
+    }
+
+    [Fact]
+    public void SearchText_ShowsOnlyMatchingTodos()
+    {
+        var storage = new FakeTodoStorageService();
+
+        storage.TodosToLoad.Add(new TodoItem
+        {
+            Title = "WPF 데이터 바인딩 공부"
+        });
+
+        storage.TodosToLoad.Add(new TodoItem
+        {
+            Title = "C# 문법 복습"
+        });
+
+        var viewModel = new MainWindowViewModel(storage);
+
+        viewModel.SearchText = "wpf";
+
+        var visibleTodos = viewModel.TodosView.Cast<TodoItem>().ToList();
+
+        Assert.Single(visibleTodos);
+        Assert.Equal("WPF 데이터 바인딩 공부", visibleTodos[0].Title);
+        Assert.Equal(2, viewModel.Todos.Count);
+        Assert.Single(visibleTodos);
+    }
+
+    [Fact]
+    public void SearchText_WithCompletedFilter_ShowsOnlyMatchingCompletedTodos()
+    {
+        var storage = new FakeTodoStorageService();
+
+        storage.TodosToLoad.Add(new TodoItem
+        {
+            Title = "WPF 데이터 바인딩 공부",
+            IsDone = false
+        });
+
+        storage.TodosToLoad.Add(new TodoItem
+        {
+            Title = "WPF 테스트 공부",
+            IsDone = true
+        });
+
+        storage.TodosToLoad.Add(new TodoItem
+        {
+            Title = "C# 문법 복습",
+            IsDone = true
+        });
+
+        var viewModel = new MainWindowViewModel(storage)
+        {
+            SelectedFilter = TodoFilter.Completed,
+            SearchText = "wpf"
+        };
+        
+        var visibleTodos = viewModel.TodosView.Cast<TodoItem>().ToList();
+
+        Assert.Single(visibleTodos);
+        Assert.Equal("WPF 테스트 공부", visibleTodos[0].Title);
+    }
+
+    [Fact]
+    public void ClearSearchCommand_ClearsSearchText()
+    {
+        var storage = new FakeTodoStorageService();
+        var viewModel = new MainWindowViewModel(storage)
+        {
+            SearchText = "wpf"
+        };     
+
+        viewModel.ClearSearchCommand.Execute(null);
+
+        Assert.Equal(string.Empty, viewModel.SearchText);
+    }
 }
