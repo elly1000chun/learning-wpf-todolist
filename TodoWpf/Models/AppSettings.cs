@@ -1,5 +1,4 @@
-﻿using TodoWpf.ViewModels;
-
+﻿
 namespace TodoWpf.Models;
 public class AppSettings
 {

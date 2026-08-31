@@ -1,7 +1,7 @@
 ﻿<Window x:Class="TodoWpf.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="clr-namespace:TodoWpf.ViewModels"
+        xmlns:models="clr-namespace:TodoWpf.Models"
         Title="설정"
         Width="420"
         Height="320"
@@ -28,11 +28,11 @@
                       SelectedValuePath="Tag"
                       Margin="0,0,0,16">
                 <ComboBoxItem Content="전체"
-                  Tag="{x:Static vm:TodoFilter.All}"/>
+                  Tag="{x:Static models:TodoFilter.All}"/>
                 <ComboBoxItem Content="진행 중"
-                  Tag="{x:Static vm:TodoFilter.Active}"/>
+                  Tag="{x:Static models:TodoFilter.Active}"/>
                 <ComboBoxItem Content="완료"
-                  Tag="{x:Static vm:TodoFilter.Completed}"/>
+                  Tag="{x:Static models:TodoFilter.Completed}"/>
             </ComboBox>
 
             <CheckBox Content="검색어 기억"

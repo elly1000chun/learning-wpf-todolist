@@ -481,6 +481,33 @@ DI 단계에서는 View와 ViewModel이 필요한 객체를 직접 만들지 않
 
 핵심은 테스트 리팩터링도 기능 코드 리팩터링과 똑같이 “작게 바꾸고 자주 확인하는 것”입니다. 테스트 코드가 짧아질수록 어떤 조건을 준비하고 어떤 명령을 실행하며 무엇을 검증하는지가 더 잘 보입니다.
 
+## TodoFilter 구조 정리 학습 메모
+
+구조 정리 단계에서는 `TodoFilter` enum을 `ViewModels`에서 `Models`로 옮기며, 프로젝트 안의 의존 방향을 더 자연스럽게 정리하는 흐름을 배웠습니다.
+
+이번 구현에서 배운 흐름은 다음과 같습니다.
+
+1. `TodoFilter`는 화면 동작만의 값이 아니라 할 일 필터 상태를 표현하는 공통 모델 값으로 볼 수 있다.
+2. `AppSettings`가 `DefaultFilter`를 저장하려면 `TodoFilter`를 알아야 한다.
+3. `AppSettings`는 `Models`에 있으므로, `TodoFilter`가 `ViewModels`에 있으면 `Models`가 `ViewModels`를 바라보는 구조가 된다.
+4. 공통 값인 `TodoFilter`를 `Models/TodoFilter.cs`로 옮겨 의존 방향을 `ViewModels -> Models`로 정리한다.
+5. `AppSettings.cs`에서 불필요해진 `using TodoWpf.ViewModels;`를 제거한다.
+6. `MainWindowViewModel`과 `SettingsWindowViewModel`은 `using TodoWpf.Models;`를 통해 `TodoFilter`를 사용한다.
+7. XAML에서 enum을 참조하는 `x:Static` 경로도 `models:TodoFilter`로 바꾼다.
+8. `MainWindow.xaml`, `SettingsWindow.xaml`, `Styles/TodoStyles.xaml`처럼 enum을 참조하는 XAML 파일을 함께 점검한다.
+9. 더 이상 사용하지 않는 XAML namespace는 제거해 파일 상단을 단정하게 유지한다.
+10. 빌드와 테스트를 실행해 C# 코드, XAML 컴파일, ViewModel 테스트가 모두 같은 enum 위치를 바라보는지 확인한다.
+
+이번 단계에서 확인한 주요 동작은 다음과 같습니다.
+
+- `TodoFilter` 정의는 `Models/TodoFilter.cs` 한 곳에만 남았다.
+- `AppSettings`가 더 이상 `ViewModels` namespace에 의존하지 않는다.
+- 필터 버튼과 스타일 `DataTrigger`가 `models:TodoFilter`를 참조한다.
+- 설정 창의 시작 필터 선택도 `models:TodoFilter`를 참조한다.
+- 빌드와 테스트 통과로 enum 이동 후에도 기존 동작이 유지됨을 확인했다.
+
+핵심은 “어느 계층의 코드가 어느 계층을 알아도 되는가”를 보는 것입니다. ViewModel은 화면 상태를 만들기 위해 Model을 알아도 자연스럽지만, Model이 ViewModel을 알아야 한다면 보통 위치를 다시 생각해볼 신호입니다.
+
 ## 실행과 빌드
 
 앱 프로젝트 폴더에서 다음 명령을 사용할 수 있습니다.
@@ -522,11 +549,12 @@ Visual Studio에서는 `TodoWpf.slnx` 또는 `TodoWpf.csproj`를 열고 `F5`로 
 17. 설정 화면 분리
 18. 기본 필터 저장
 19. 테스트 정리와 중복 줄이기
+20. `TodoFilter` enum 위치 재검토와 구조 정리
 
 ## 다음 실습 후보
 
-1. 구조 정리: `TodoFilter` enum 위치 재검토
-2. 설정 화면 확장: 테마 같은 옵션 추가
-3. 입력 검증 개선: 빈 제목, 긴 제목, 공백 처리 정리
+1. 설정 화면 확장: 테마 같은 옵션 추가
+2. 입력 검증 개선: 빈 제목, 긴 제목, 공백 처리 정리
+3. 데이터 모델 확장: 생성일, 수정일, 마감일 추가
 
 기능을 추가할 때는 한 번에 많은 구조를 바꾸기보다, ViewModel 속성 하나, Command 하나, XAML 바인딩 하나처럼 작은 단위로 이해하면서 확장하는 것을 권장합니다.

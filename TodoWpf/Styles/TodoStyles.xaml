@@ -1,6 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:vm="clr-namespace:TodoWpf.ViewModels">
+                    xmlns:models="clr-namespace:TodoWpf.Models">
 
     <SolidColorBrush x:Key="TodoTextBrush" Color="#222222"/>
     <SolidColorBrush x:Key="CompletedTodoTextBrush" Color="#808080"/>
@@ -47,7 +47,7 @@
            BasedOn="{StaticResource FilterButtonBaseStyle}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding SelectedFilter}"
-                         Value="{x:Static vm:TodoFilter.All}">
+                         Value="{x:Static models:TodoFilter.All}">
                 <Setter Property="Background" Value="{StaticResource SelectedFilterButtonBackgroundBrush}"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
             </DataTrigger>
@@ -59,7 +59,7 @@
            BasedOn="{StaticResource FilterButtonBaseStyle}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding SelectedFilter}"
-                         Value="{x:Static vm:TodoFilter.Active}">
+                         Value="{x:Static models:TodoFilter.Active}">
                 <Setter Property="Background" Value="{StaticResource SelectedFilterButtonBackgroundBrush}"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
             </DataTrigger>
@@ -71,7 +71,7 @@
            BasedOn="{StaticResource FilterButtonBaseStyle}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding SelectedFilter}"
-                         Value="{x:Static vm:TodoFilter.Completed}">
+                         Value="{x:Static models:TodoFilter.Completed}">
                 <Setter Property="Background" Value="{StaticResource SelectedFilterButtonBackgroundBrush}"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
             </DataTrigger>

@@ -1,4 +1,4 @@
-﻿namespace TodoWpf.ViewModels;
+﻿namespace TodoWpf.Models;
 
 public enum TodoFilter
 {

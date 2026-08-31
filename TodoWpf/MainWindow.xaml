@@ -1,7 +1,7 @@
 ﻿<Window x:Class="TodoWpf.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="clr-namespace:TodoWpf.ViewModels"
+        xmlns:models="clr-namespace:TodoWpf.Models"
         Title="WPF 할 일 관리"
         Width="560"
         Height="420"
@@ -47,18 +47,18 @@
                     Margin="0,0,8,0"
                     Style="{StaticResource AllFilterButtonStyle}"
                     Command="{Binding SetFilterCommand}"
-                    CommandParameter="{x:Static vm:TodoFilter.All}"/>
+                    CommandParameter="{x:Static models:TodoFilter.All}"/>
 
             <Button Content="진행 중"
                     Margin="0,0,8,0"
                     Style="{StaticResource ActiveFilterButtonStyle}"
                     Command="{Binding SetFilterCommand}"
-                    CommandParameter="{x:Static vm:TodoFilter.Active}"/>
+                    CommandParameter="{x:Static models:TodoFilter.Active}"/>
 
             <Button Content="완료"
                     Style="{StaticResource CompletedFilterButtonStyle}"
                     Command="{Binding SetFilterCommand}"
-                    CommandParameter="{x:Static vm:TodoFilter.Completed}"/>
+                    CommandParameter="{x:Static models:TodoFilter.Completed}"/>
 
             <Button Content="완료 항목 삭제"
                     Margin="12,0,0,0"

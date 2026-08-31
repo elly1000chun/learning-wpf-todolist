@@ -40,6 +40,8 @@ learning-wpf-todolist/
 │  ├─ MainWindow.xaml
 │  ├─ MainWindow.xaml.cs
 │  ├─ Models/
+│  │  ├─ AppSettings.cs
+│  │  ├─ TodoFilter.cs
 │  │  └─ TodoItems.cs
 │  ├─ Services/
 │  │  └─ TodoStorageService.cs
@@ -47,7 +49,7 @@ learning-wpf-todolist/
 │  │  └─ TodoStyles.xaml
 │  ├─ ViewModels/
 │  │  ├─ MainWindowViewModel.cs
-│  │  └─ TodoFilter.cs
+│  │  └─ SettingsWindowViewModel.cs
 │  └─ TodoWpf.csproj
 ├─ TodoWpf.Tests/
 │  ├─ MainWindowViewModelTests.cs
@@ -63,7 +65,9 @@ learning-wpf-todolist/
 - `MainWindow.xaml`: 화면 레이아웃과 바인딩을 정의합니다.
 - `MainWindow.xaml.cs`: Window 초기화, `DataContext` 설정, 입력 포커스와 키보드 사용성 처리를 담당합니다.
 - `ViewModels/MainWindowViewModel.cs`: 할 일 목록, 입력값, 추가/삭제/수정/필터/검색 명령을 관리합니다.
-- `ViewModels/TodoFilter.cs`: 전체, 진행 중, 완료 필터 값을 정의합니다.
+- `ViewModels/SettingsWindowViewModel.cs`: 설정 창에서 편집하는 사용자 옵션 상태를 관리합니다.
+- `Models/AppSettings.cs`: 검색어 기억, 시작 필터 같은 사용자 설정 값을 정의합니다.
+- `Models/TodoFilter.cs`: 전체, 진행 중, 완료 필터 값을 정의합니다.
 - `Models/TodoItems.cs`: 할 일 항목의 데이터와 변경 알림 속성을 정의합니다.
 - `Services/TodoStorageService.cs`: 할 일 목록을 JSON 파일로 저장하고 불러옵니다.
 - `Styles/TodoStyles.xaml`: 화면에서 재사용하는 스타일과 할 일 항목 템플릿을 정의합니다.
