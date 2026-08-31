@@ -584,4 +584,40 @@ public class MainWindowViewModelTests
         Assert.True(appSettingsService.Settings.RememberSearchText);
         Assert.Equal("wpf", appSettingsService.Settings.SearchText);
     }
+
+    [Fact]
+    public void ToAppSettings_ReturnsCurrentSettings()
+    {
+        var storage = new FakeTodoStorageService();
+        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService())
+        {
+            RememberSearchText = true,
+            SearchText = "wpf"
+        };
+
+        AppSettings appSettings = viewModel.ToAppSettings();
+
+        Assert.True(appSettings.RememberSearchText);
+        Assert.Equal("wpf", appSettings.SearchText);
+    }
+
+    [Fact]
+    public void ApplyAppSettings_UpdatesViewModelAndSavesSettings()
+    {
+        var storage = new FakeTodoStorageService();
+        var appSettingsService = new FakeAppSettingsService();
+        var viewModel = new MainWindowViewModel(storage, appSettingsService);
+
+        viewModel.ApplyAppSettings(new AppSettings
+        {
+            RememberSearchText = true,
+            SearchText = "wpf"
+        });
+
+        Assert.True(viewModel.RememberSearchText);
+        Assert.Equal("wpf", viewModel.SearchText);
+        Assert.True(appSettingsService.SaveCallCount >= 1);
+        Assert.True(appSettingsService.Settings.RememberSearchText);
+        Assert.Equal("wpf", appSettingsService.Settings.SearchText);
+    }
 }

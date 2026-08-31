@@ -1,18 +1,22 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using TodoWpf.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TodoWpf;
 
 public partial class MainWindow : Window
 {
     private readonly MainWindowViewModel viewModel;
+    private readonly IServiceProvider serviceProvider;
 
-    public MainWindow(MainWindowViewModel viewModel)
+    public MainWindow(MainWindowViewModel viewModel, IServiceProvider serviceProvider)
     {
         InitializeComponent();
 
         this.viewModel = viewModel;
+        this.serviceProvider = serviceProvider;
+
         DataContext = viewModel;
     }
 
@@ -62,5 +66,21 @@ public partial class MainWindow : Window
         viewModel.ClearSearchCommand.Execute(null);
         NewTodoTitleTextBox.Focus();
         e.Handled = true;
+    }
+
+    private void SettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var settingsWindow = serviceProvider.GetRequiredService<SettingsWindow>();
+        var settingsViewModel = new SettingsWindowViewModel(viewModel.ToAppSettings());
+
+        settingsWindow.Owner = this;
+        settingsWindow.DataContext = settingsViewModel;
+
+        bool? result = settingsWindow.ShowDialog();
+
+        if (result == true)
+        {
+            viewModel.ApplyAppSettings(settingsViewModel.ToAppSettings());
+        }
     }
 }

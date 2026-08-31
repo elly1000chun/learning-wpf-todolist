@@ -78,6 +78,15 @@ public partial class MainWindowViewModel : ObservableObject
     }
     // _Constructors
 
+    public AppSettings ToAppSettings()
+    {
+        return new AppSettings
+        {
+            RememberSearchText = RememberSearchText,
+            SearchText = SearchText
+        };
+    }
+
     // Helper methods -------------------------
 
     private void AddTodoItem(TodoItem item)
@@ -130,6 +139,17 @@ public partial class MainWindowViewModel : ObservableObject
         appSettings.SearchText = RememberSearchText ? SearchText : string.Empty;
 
         appSettingsService.Save(appSettings);
+    }
+
+    public void ApplyAppSettings(AppSettings newAppSettings)
+    {
+        SearchText = newAppSettings.RememberSearchText
+            ? newAppSettings.SearchText
+            : string.Empty;
+
+        RememberSearchText = newAppSettings.RememberSearchText;
+
+        SaveAppSettings();
     }
 
 

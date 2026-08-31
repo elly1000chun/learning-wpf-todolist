@@ -17,6 +17,7 @@ public partial class App : Application
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<MainWindow>();
         services.AddSingleton<IAppSettingsService, AppSettingsService>();
+        services.AddTransient<SettingsWindow>();
 
         serviceProvider = services.BuildServiceProvider();
     }
