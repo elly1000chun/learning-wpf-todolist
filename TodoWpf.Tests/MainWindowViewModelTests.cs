@@ -409,7 +409,8 @@ public class MainWindowViewModelTests
 
         Assert.Contains(activeTodo, viewModel.Todos);
         Assert.DoesNotContain(completedTodo, viewModel.Todos);
-        Assert.Equal(1, viewModel.Todos.Count);
+        Assert.Single(viewModel.Todos);
+
         Assert.Equal(1, storage.SaveCallCount);
         Assert.Contains(storage.LastSavedTodos, todo => todo.Title == "진행 중 할 일");
         Assert.DoesNotContain(storage.LastSavedTodos, todo => todo.Title == "완료된 할 일");
