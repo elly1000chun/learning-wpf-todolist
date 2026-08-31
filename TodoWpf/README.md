@@ -31,6 +31,7 @@ WPF와 MVVM 패턴을 학습하기 위한 간단한 할 일 관리 앱입니다.
 - 할 일 목록 JSON 자동 저장 및 앱 시작 시 불러오기
 - 전체 / 진행 중 / 완료 필터
 - 할 일 제목 검색 및 Esc/버튼으로 검색어 초기화
+- 최신순, 오래된순, 제목순, 미완료순 정렬
 - 설정 창에서 시작 필터, 검색어 기억, 테마 옵션 관리
 - 밝은 테마 / 어두운 테마 적용 및 저장
 - ViewModel 단위 테스트
@@ -50,6 +51,7 @@ learning-wpf-todolist/
 │  │  ├─ AppSettings.cs
 │  │  ├─ AppTheme.cs
 │  │  ├─ TodoFilter.cs
+│  │  ├─ TodoSortOption.cs
 │  │  └─ TodoItems.cs
 │  ├─ Services/
 │  │  ├─ AppSettingsService.cs
@@ -77,11 +79,12 @@ learning-wpf-todolist/
 - `App.xaml.cs`: DI 컨테이너 구성, 앱 시작 시 `MainWindow` 생성, 앱 종료 시 컨테이너 정리를 담당합니다.
 - `MainWindow.xaml`: 화면 레이아웃과 바인딩을 정의합니다.
 - `MainWindow.xaml.cs`: Window 초기화, `DataContext` 설정, 입력 포커스와 키보드 사용성 처리를 담당합니다.
-- `ViewModels/MainWindowViewModel.cs`: 할 일 목록, 입력값, 입력 검증, 날짜 메타데이터, 추가/삭제/수정/필터/검색 명령을 관리합니다.
+- `ViewModels/MainWindowViewModel.cs`: 할 일 목록, 입력값, 입력 검증, 날짜 메타데이터, 추가/삭제/수정/필터/검색/정렬 명령을 관리합니다.
 - `ViewModels/SettingsWindowViewModel.cs`: 설정 창에서 편집하는 사용자 옵션 상태를 관리합니다.
 - `Models/AppSettings.cs`: 검색어 기억, 시작 필터, 테마 같은 사용자 설정 값을 정의합니다.
 - `Models/AppTheme.cs`: 밝은 테마, 어두운 테마 값을 정의합니다.
 - `Models/TodoFilter.cs`: 전체, 진행 중, 완료 필터 값을 정의합니다.
+- `Models/TodoSortOption.cs`: 최신순, 오래된순, 제목순, 미완료순 정렬 옵션을 정의합니다.
 - `Models/TodoItems.cs`: 할 일 제목, 완료 여부, 작성일, 수정일, 마감일 같은 항목 데이터를 정의합니다.
 - `Services/AppSettingsService.cs`: 사용자 설정을 JSON 파일로 저장하고 불러옵니다.
 - `Services/ThemeService.cs`: 설정된 테마에 맞게 앱 리소스 딕셔너리를 교체합니다.
@@ -115,7 +118,7 @@ cd D:\Dev\WPF\learning-wpf-todolist
 dotnet test
 ```
 
-현재 테스트는 `MainWindowViewModel`을 대상으로 하며, 실제 JSON 파일을 쓰지 않도록 `FakeTodoStorageService`를 사용합니다. 추가, 삭제, 완료 항목 삭제, 전체 삭제, 저장, 필터, 검색, 수정 시작, 수정 저장, 수정 취소, 입력 검증, 날짜 메타데이터 동작을 검증합니다.
+현재 테스트는 `MainWindowViewModel`을 대상으로 하며, 실제 JSON 파일을 쓰지 않도록 `FakeTodoStorageService`를 사용합니다. 추가, 삭제, 완료 항목 삭제, 전체 삭제, 저장, 필터, 검색, 정렬, 수정 시작, 수정 저장, 수정 취소, 입력 검증, 날짜 메타데이터 동작을 검증합니다.
 
 ## 사용 기술
 
@@ -132,8 +135,8 @@ dotnet test
 
 ## 다음 학습 과제
 
-- 정렬 기능
 - 마감일 입력 UI
+- 서비스 테스트 심화
 
 ## 메모
 

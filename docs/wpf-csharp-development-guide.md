@@ -605,6 +605,42 @@ DI 단계에서는 View와 ViewModel이 필요한 객체를 직접 만들지 않
 
 핵심은 모델에 속성을 추가하는 일이 단순히 C# property 하나를 늘리는 작업으로 끝나지 않는다는 점입니다. 저장 JSON, ViewModel 생성/수정 규칙, XAML 표시, 기존 데이터 호환성, 테스트까지 함께 보아야 실제 기능으로 안정됩니다.
 
+## 정렬 기능 학습 메모
+
+정렬 기능 단계에서는 `Todos` 원본 컬렉션을 직접 재배열하지 않고, 화면에 연결된 `TodosView`에 정렬 조건을 적용하는 흐름을 배웠습니다.
+
+이번 구현에서 배운 흐름은 다음과 같습니다.
+
+1. 처음에는 `SelectedSort`를 문자열로 두어 최신순과 오래된순 정렬을 작게 구현한다.
+2. `TodosView.SortDescriptions`에 `CreatedAt` 정렬 조건을 추가해 작성일 기준 정렬을 적용한다.
+3. `SelectedSort`가 바뀔 때 `ApplySort()`를 호출해 화면 목록 정렬을 갱신한다.
+4. `MainWindow.xaml`에 정렬 `ComboBox`를 추가하고 `SelectedSort`와 양방향 바인딩한다.
+5. 문자열 비교 방식에서 `TodoSortOption` enum으로 바꿔 오타에 강한 구조로 정리한다.
+6. XAML의 `ComboBoxItem.Tag`에 `TodoSortOption` 값을 넣고 `SelectedValuePath="Tag"`로 enum 값을 바인딩한다.
+7. `TitleAscending` 옵션을 추가해 제목 오름차순 정렬을 구현한다.
+8. `IncompleteFirst` 옵션을 추가해 미완료 항목을 먼저 표시한다.
+9. `IncompleteFirst`에서는 `IsDone` 오름차순 정렬 뒤에 `CreatedAt` 내림차순 정렬을 추가해 같은 그룹 안에서는 최신순을 유지한다.
+10. ViewModel 테스트에서 최신순, 오래된순, 제목순, 미완료순, 완료 상태 변경 후 재정렬을 검증한다.
+
+이번 단계에서 확인한 주요 동작은 다음과 같습니다.
+
+- 기본 정렬은 작성일 최신순이다.
+- `오래된순`을 선택하면 작성일 오름차순으로 표시된다.
+- `제목순`을 선택하면 제목 오름차순으로 표시된다.
+- `미완료순`을 선택하면 `IsDone == false` 항목이 먼저 표시된다.
+- 미완료/완료 그룹 안에서는 작성일 최신순이 유지된다.
+- 체크박스로 완료 상태를 바꾸면 `TodosView.Refresh()`를 통해 정렬 결과도 다시 갱신된다.
+- 전체 테스트 통과로 필터, 검색, 정렬이 함께 동작함을 확인했다.
+
+이번 단계에서 주의할 점도 확인했습니다. `bool` 값은 오름차순 정렬에서 `false`가 `true`보다 먼저 옵니다. 그래서 `IsDone`을 `ListSortDirection.Ascending`으로 정렬하면 미완료 항목이 먼저 표시됩니다.
+
+```csharp
+TodosView.SortDescriptions.Add(
+    new SortDescription(nameof(TodoItem.IsDone), ListSortDirection.Ascending));
+```
+
+핵심은 정렬을 데이터 자체의 저장 순서와 분리하는 것입니다. `ObservableCollection<T>`는 원본 데이터 역할을 하고, `CollectionView`는 사용자가 현재 보고 싶은 필터와 정렬 상태를 표현합니다.
+
 ## 실행과 빌드
 
 앱 프로젝트 폴더에서 다음 명령을 사용할 수 있습니다.
@@ -650,11 +686,12 @@ Visual Studio에서는 `TodoWpf.slnx` 또는 `TodoWpf.csproj`를 열고 `F5`로 
 21. 설정 화면 확장: 테마 옵션 추가
 22. 입력 검증 개선: 빈 제목, 긴 제목, 공백 처리 정리
 23. 데이터 모델 확장: 생성일, 수정일, 마감일 추가
+24. 정렬 기능: 생성일순, 완료 여부순, 제목순 정렬
 
 ## 다음 실습 후보
 
-1. 정렬 기능: 생성일순, 완료 여부순, 제목순 정렬
-2. 마감일 입력 UI: DatePicker로 할 일 마감일 지정
-3. 서비스 테스트 심화: JSON 저장소와 설정 저장소 테스트 분리
+1. 마감일 입력 UI: DatePicker로 할 일 마감일 지정
+2. 서비스 테스트 심화: JSON 저장소와 설정 저장소 테스트 분리
+3. 정렬 설정 저장: 마지막으로 선택한 정렬 옵션 기억
 
 기능을 추가할 때는 한 번에 많은 구조를 바꾸기보다, ViewModel 속성 하나, Command 하나, XAML 바인딩 하나처럼 작은 단위로 이해하면서 확장하는 것을 권장합니다.

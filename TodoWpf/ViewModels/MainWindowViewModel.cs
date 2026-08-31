@@ -23,6 +23,9 @@ public partial class MainWindowViewModel : ObservableObject
     private TodoFilter selectedFilter = TodoFilter.All;
 
     [ObservableProperty]
+    private TodoSortOption selectedSort = TodoSortOption.NewestFirst;
+
+    [ObservableProperty]
     private AppTheme theme = AppTheme.Light;
 
     [ObservableProperty]
@@ -85,6 +88,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         TodosView = CollectionViewSource.GetDefaultView(Todos);
         TodosView.Filter = FilterTodo;
+        ApplySort();
 
         // load settings
         appSettings = appSettingsService.Load();
@@ -187,6 +191,11 @@ public partial class MainWindowViewModel : ObservableObject
         TodosView.Refresh();
     }
 
+    partial void OnSelectedSortChanged(TodoSortOption value)
+    {
+        ApplySort();
+    }
+
     partial void OnThemeChanged(AppTheme value)
     {
         appSettings.Theme = value;
@@ -214,6 +223,35 @@ public partial class MainWindowViewModel : ObservableObject
             return true;
 
         return todo.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void ApplySort()
+    {
+        TodosView.SortDescriptions.Clear();
+
+        switch (SelectedSort)
+        {
+            case TodoSortOption.OldestFirst:
+                TodosView.SortDescriptions.Add(
+                    new SortDescription(nameof(TodoItem.CreatedAt), ListSortDirection.Ascending));
+                break;
+
+            case TodoSortOption.TitleAscending:
+                TodosView.SortDescriptions.Add(
+                    new SortDescription(nameof(TodoItem.Title), ListSortDirection.Ascending));
+                break;
+            case TodoSortOption.IncompleteFirst:
+                TodosView.SortDescriptions.Add(
+                    new SortDescription(nameof(TodoItem.IsDone), ListSortDirection.Ascending));
+                TodosView.SortDescriptions.Add(
+                    new SortDescription(nameof(TodoItem.CreatedAt), ListSortDirection.Descending));
+                break;
+            case TodoSortOption.NewestFirst:
+            default:
+                TodosView.SortDescriptions.Add(
+                    new SortDescription(nameof(TodoItem.CreatedAt), ListSortDirection.Descending));
+                break;
+        }
     }
 
     partial void OnNewTodoTitleChanged(string value)

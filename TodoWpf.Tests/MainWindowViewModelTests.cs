@@ -64,6 +64,141 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
+    public void Constructor_SortsTodosByCreatedAtDescending()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var oldTodo = CreateTodo("오래된 할 일");
+        oldTodo.CreatedAt = new DateTime(2026, 1, 1, 9, 0, 0);
+
+        var newTodo = CreateTodo("최근 할 일");
+        newTodo.CreatedAt = new DateTime(2026, 1, 2, 9, 0, 0);
+
+        storage.TodosToLoad.Add(oldTodo);
+        storage.TodosToLoad.Add(newTodo);
+
+        var viewModel = CreateViewModel(storage);
+
+        var visibleTitles = viewModel.TodosView
+            .Cast<TodoItem>()
+            .Select(todo => todo.Title)
+            .ToList();
+
+        Assert.Equal(new[] { "최근 할 일", "오래된 할 일" }, visibleTitles);
+    }
+
+    [Fact]
+    public void SelectedSort_OldestFirst_SortsTodosByCreatedAtAscending()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var oldTodo = CreateTodo("오래된 할 일");
+        oldTodo.CreatedAt = new DateTime(2026, 1, 1, 9, 0, 0);
+
+        var newTodo = CreateTodo("최근 할 일");
+        newTodo.CreatedAt = new DateTime(2026, 1, 2, 9, 0, 0);
+
+        storage.TodosToLoad.Add(oldTodo);
+        storage.TodosToLoad.Add(newTodo);
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.SelectedSort = TodoSortOption.OldestFirst;
+
+        var visibleTitles = viewModel.TodosView
+            .Cast<TodoItem>()
+            .Select(todo => todo.Title)
+            .ToList();
+
+        Assert.Equal(new[] { "오래된 할 일", "최근 할 일" }, visibleTitles);
+    }
+
+    [Fact]
+    public void SelectedSort_TitleAscending_SortsTodosByTitleAscending()
+    {
+        var storage = new FakeTodoStorageService();
+
+        storage.TodosToLoad.Add(CreateTodo("C 할 일"));
+        storage.TodosToLoad.Add(CreateTodo("A 할 일"));
+        storage.TodosToLoad.Add(CreateTodo("B 할 일"));
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.SelectedSort = TodoSortOption.TitleAscending;
+
+        var visibleTitles = viewModel.TodosView
+            .Cast<TodoItem>()
+            .Select(todo => todo.Title)
+            .ToList();
+
+        Assert.Equal(new[] { "A 할 일", "B 할 일", "C 할 일" }, visibleTitles);
+    }
+
+    [Fact]
+    public void SelectedSort_IncompleteFirst_SortsIncompleteTodosFirstThenCreatedAtDescending()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var oldIncompleteTodo = CreateTodo("오래된 미완료", isDone: false);
+        oldIncompleteTodo.CreatedAt = new DateTime(2026, 1, 1, 9, 0, 0);
+
+        var newIncompleteTodo = CreateTodo("최근 미완료", isDone: false);
+        newIncompleteTodo.CreatedAt = new DateTime(2026, 1, 2, 9, 0, 0);
+
+        var oldCompletedTodo = CreateTodo("오래된 완료", isDone: true);
+        oldCompletedTodo.CreatedAt = new DateTime(2026, 1, 1, 10, 0, 0);
+
+        var newCompletedTodo = CreateTodo("최근 완료", isDone: true);
+        newCompletedTodo.CreatedAt = new DateTime(2026, 1, 2, 10, 0, 0);
+
+        storage.TodosToLoad.Add(oldCompletedTodo);
+        storage.TodosToLoad.Add(oldIncompleteTodo);
+        storage.TodosToLoad.Add(newCompletedTodo);
+        storage.TodosToLoad.Add(newIncompleteTodo);
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.SelectedSort = TodoSortOption.IncompleteFirst;
+
+        var visibleTitles = viewModel.TodosView
+            .Cast<TodoItem>()
+            .Select(todo => todo.Title)
+            .ToList();
+
+        Assert.Equal(
+            new[] { "최근 미완료", "오래된 미완료", "최근 완료", "오래된 완료" },
+            visibleTitles);
+    }
+
+    [Fact]
+    public void TodoIsDoneChanged_RefreshesIncompleteFirstSort()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var incompleteTodo = CreateTodo("기존 미완료", isDone: false);
+        incompleteTodo.CreatedAt = new DateTime(2026, 1, 1, 9, 0, 0);
+
+        var completedTodo = CreateTodo("완료에서 미완료로", isDone: true);
+        completedTodo.CreatedAt = new DateTime(2026, 1, 2, 9, 0, 0);
+
+        storage.TodosToLoad.Add(incompleteTodo);
+        storage.TodosToLoad.Add(completedTodo);
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.SelectedSort = TodoSortOption.IncompleteFirst;
+
+        completedTodo.IsDone = false;
+
+        var visibleTitles = viewModel.TodosView
+            .Cast<TodoItem>()
+            .Select(todo => todo.Title)
+            .ToList();
+
+        Assert.Equal(new[] { "완료에서 미완료로", "기존 미완료" }, visibleTitles);
+    }
+
+    [Fact]
     public void AddTodoCommand_AddsTodoAndSaves()
     {
         var storage = new FakeTodoStorageService();
