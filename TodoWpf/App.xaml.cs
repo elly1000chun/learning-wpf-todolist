@@ -14,9 +14,11 @@ public partial class App : Application
         var services = new ServiceCollection();
 
         services.AddSingleton<ITodoStorageService, TodoStorageService>();
+        services.AddSingleton<IAppSettingsService, AppSettingsService>();
+        services.AddSingleton<IThemeService, ThemeService>();
+
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<MainWindow>();
-        services.AddSingleton<IAppSettingsService, AppSettingsService>();
         services.AddTransient<SettingsWindow>();
 
         serviceProvider = services.BuildServiceProvider();

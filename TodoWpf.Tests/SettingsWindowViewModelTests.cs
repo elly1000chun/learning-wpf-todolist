@@ -12,12 +12,14 @@ public class SettingsWindowViewModelTests
         {
             RememberSearchText = true,
             SearchText = "wpf",
-            DefaultFilter = TodoFilter.Completed
+            DefaultFilter = TodoFilter.Completed,
+            Theme = AppTheme.Dark
         });
 
         Assert.True(viewModel.RememberSearchText);
         Assert.Equal("wpf", viewModel.SearchText);
         Assert.Equal(TodoFilter.Completed, viewModel.DefaultFilter);
+        Assert.Equal(AppTheme.Dark, viewModel.Theme);
     }
 
     [Fact]
@@ -27,7 +29,8 @@ public class SettingsWindowViewModelTests
         {
             RememberSearchText = true,
             SearchText = "wpf",
-            DefaultFilter = TodoFilter.Active
+            DefaultFilter = TodoFilter.Active,
+            Theme = AppTheme.Dark
         };
 
         AppSettings appSettings = viewModel.ToAppSettings();
@@ -35,6 +38,7 @@ public class SettingsWindowViewModelTests
         Assert.True(appSettings.RememberSearchText);
         Assert.Equal("wpf", appSettings.SearchText);
         Assert.Equal(TodoFilter.Active, appSettings.DefaultFilter);
+        Assert.Equal(AppTheme.Dark, appSettings.Theme);
     }
 
     [Fact]

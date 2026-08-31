@@ -6,9 +6,11 @@
         Width="560"
         Height="420"
         WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource WindowBackgroundBrush}"
         Loaded="Window_Loaded">
 
-    <Grid Margin="24">
+    <Grid Margin="24"
+          TextElement.Foreground="{DynamicResource PrimaryTextBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>

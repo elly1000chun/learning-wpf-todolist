@@ -508,6 +508,42 @@ DI 단계에서는 View와 ViewModel이 필요한 객체를 직접 만들지 않
 
 핵심은 “어느 계층의 코드가 어느 계층을 알아도 되는가”를 보는 것입니다. ViewModel은 화면 상태를 만들기 위해 Model을 알아도 자연스럽지만, Model이 ViewModel을 알아야 한다면 보통 위치를 다시 생각해볼 신호입니다.
 
+## 테마 옵션 추가 학습 메모
+
+테마 옵션 추가 단계에서는 설정 화면에서 밝은 테마와 어두운 테마를 선택하고, 선택한 값을 저장한 뒤 앱 리소스에 적용하는 흐름을 배웠습니다.
+
+이번 구현에서 배운 흐름은 다음과 같습니다.
+
+1. `AppTheme` enum을 만들어 `Light`, `Dark` 테마 값을 표현한다.
+2. `AppSettings`에 `Theme` 속성을 추가해 선택한 테마를 사용자 설정 JSON에 저장한다.
+3. `SettingsWindowViewModel`에 `Theme` 속성을 추가해 설정 창에서 테마 값을 편집한다.
+4. `SettingsWindow.xaml`에 테마 선택 `ComboBox`를 추가하고 `ComboBoxItem.Tag`에 `models:AppTheme` 값을 연결한다.
+5. `MainWindowViewModel.ToAppSettings()`, `ApplyAppSettings()`, `SaveAppSettings()`에 `Theme` 값을 포함한다.
+6. `LightTheme.xaml`, `DarkTheme.xaml` 리소스 딕셔너리를 만들어 테마별 색상 brush를 분리한다.
+7. `App.xaml`에서 기본 테마 리소스를 `TodoStyles.xaml`보다 먼저 병합한다.
+8. `TodoStyles.xaml`의 고정 색상 값을 `PrimaryTextBrush`, `ButtonBackgroundBrush`, `InputBackgroundBrush` 같은 테마 brush 참조로 바꾼다.
+9. 앱 실행 중 리소스가 바뀔 수 있는 값은 `DynamicResource`로 참조한다.
+10. `IThemeService`와 `ThemeService`를 만들어 현재 테마 리소스 딕셔너리를 교체하는 책임을 서비스로 분리한다.
+11. `MainWindowViewModel`은 생성자에서 저장된 테마를 적용하고, `Theme`이 바뀔 때 `themeService.ApplyTheme()`을 호출한다.
+12. 테스트에서는 실제 WPF 리소스를 바꾸지 않도록 `FakeThemeService`를 사용한다.
+13. `MainWindowViewModelTests`와 `SettingsWindowViewModelTests`에 테마 복사, 적용, 저장 테스트를 보강한다.
+
+이번 단계에서 확인한 주요 동작은 다음과 같습니다.
+
+- 설정 창에서 `밝게`와 `어둡게` 테마를 선택할 수 있다.
+- 테마 설정을 저장하면 메인 화면이 선택한 테마 색상으로 바뀐다.
+- 앱을 다시 실행해도 저장된 테마가 유지된다.
+- `TextBox`, `Button`, 할 일 제목, 완료된 항목 색상이 테마 리소스를 따른다.
+- 빌드와 전체 테스트 통과로 설정 저장, 테마 적용, ViewModel 테스트가 함께 유지됨을 확인했다.
+
+이번 단계에서 주의할 점도 확인했습니다. `Grid`에는 `Foreground` 속성이 없으므로, Grid 아래 텍스트 색상을 상속시키고 싶을 때는 `TextElement.Foreground` attached property를 사용합니다.
+
+```xml
+<Grid TextElement.Foreground="{DynamicResource PrimaryTextBrush}">
+```
+
+핵심은 테마를 단순히 색상 몇 개를 바꾸는 작업으로 보지 않고, “사용자 설정, 리소스 딕셔너리, 서비스, ViewModel, 테스트”가 연결된 기능으로 보는 것입니다. 이렇게 나누면 이후 테마 종류가 늘어나거나 색상 리소스가 많아져도 구조를 크게 흔들지 않고 확장할 수 있습니다.
+
 ## 실행과 빌드
 
 앱 프로젝트 폴더에서 다음 명령을 사용할 수 있습니다.
@@ -550,11 +586,12 @@ Visual Studio에서는 `TodoWpf.slnx` 또는 `TodoWpf.csproj`를 열고 `F5`로 
 18. 기본 필터 저장
 19. 테스트 정리와 중복 줄이기
 20. `TodoFilter` enum 위치 재검토와 구조 정리
+21. 설정 화면 확장: 테마 옵션 추가
 
 ## 다음 실습 후보
 
-1. 설정 화면 확장: 테마 같은 옵션 추가
-2. 입력 검증 개선: 빈 제목, 긴 제목, 공백 처리 정리
-3. 데이터 모델 확장: 생성일, 수정일, 마감일 추가
+1. 입력 검증 개선: 빈 제목, 긴 제목, 공백 처리 정리
+2. 데이터 모델 확장: 생성일, 수정일, 마감일 추가
+3. 정렬 기능: 생성일순, 완료 여부순, 제목순 정렬
 
 기능을 추가할 때는 한 번에 많은 구조를 바꾸기보다, ViewModel 속성 하나, Command 하나, XAML 바인딩 하나처럼 작은 단위로 이해하면서 확장하는 것을 권장합니다.

@@ -4,11 +4,13 @@
         xmlns:models="clr-namespace:TodoWpf.Models"
         Title="설정"
         Width="420"
-        Height="320"
+        Height="360"
         ResizeMode="NoResize"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}">
 
-    <Grid Margin="24">
+    <Grid Margin="24"
+          TextElement.Foreground="{DynamicResource PrimaryTextBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -33,6 +35,17 @@
                   Tag="{x:Static models:TodoFilter.Active}"/>
                 <ComboBoxItem Content="완료"
                   Tag="{x:Static models:TodoFilter.Completed}"/>
+            </ComboBox>
+
+            <TextBlock Text="테마"
+                       Margin="0,0,0,8"/>
+            <ComboBox SelectedValue="{Binding Theme}"
+                      SelectedValuePath="Tag"
+                      Margin="0,0,0,16">
+                <ComboBoxItem Content="밝게"
+                              Tag="{x:Static models:AppTheme.Light}"/>
+                <ComboBoxItem Content="어둡게"
+                              Tag="{x:Static models:AppTheme.Dark}"/>
             </ComboBox>
 
             <CheckBox Content="검색어 기억"

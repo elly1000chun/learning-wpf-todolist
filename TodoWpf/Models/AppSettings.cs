@@ -7,4 +7,6 @@ public class AppSettings
     public string SearchText { get; set; } = string.Empty;
 
     public TodoFilter DefaultFilter { get; set; } = TodoFilter.All;
+
+    public AppTheme Theme { get; set; } = AppTheme.Light;
 }

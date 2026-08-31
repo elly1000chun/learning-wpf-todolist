@@ -26,6 +26,8 @@ WPF와 MVVM 패턴을 학습하기 위한 간단한 할 일 관리 앱입니다.
 - 할 일 목록 JSON 자동 저장 및 앱 시작 시 불러오기
 - 전체 / 진행 중 / 완료 필터
 - 할 일 제목 검색 및 Esc/버튼으로 검색어 초기화
+- 설정 창에서 시작 필터, 검색어 기억, 테마 옵션 관리
+- 밝은 테마 / 어두운 테마 적용 및 저장
 - ViewModel 단위 테스트
 - 스타일과 리소스 딕셔너리 분리
 - DI 컨테이너를 통한 ViewModel과 Service 생성
@@ -41,11 +43,17 @@ learning-wpf-todolist/
 │  ├─ MainWindow.xaml.cs
 │  ├─ Models/
 │  │  ├─ AppSettings.cs
+│  │  ├─ AppTheme.cs
 │  │  ├─ TodoFilter.cs
 │  │  └─ TodoItems.cs
 │  ├─ Services/
+│  │  ├─ AppSettingsService.cs
+│  │  ├─ ThemeService.cs
 │  │  └─ TodoStorageService.cs
 │  ├─ Styles/
+│  │  ├─ Themes/
+│  │  │  ├─ DarkTheme.xaml
+│  │  │  └─ LightTheme.xaml
 │  │  └─ TodoStyles.xaml
 │  ├─ ViewModels/
 │  │  ├─ MainWindowViewModel.cs
@@ -66,11 +74,16 @@ learning-wpf-todolist/
 - `MainWindow.xaml.cs`: Window 초기화, `DataContext` 설정, 입력 포커스와 키보드 사용성 처리를 담당합니다.
 - `ViewModels/MainWindowViewModel.cs`: 할 일 목록, 입력값, 추가/삭제/수정/필터/검색 명령을 관리합니다.
 - `ViewModels/SettingsWindowViewModel.cs`: 설정 창에서 편집하는 사용자 옵션 상태를 관리합니다.
-- `Models/AppSettings.cs`: 검색어 기억, 시작 필터 같은 사용자 설정 값을 정의합니다.
+- `Models/AppSettings.cs`: 검색어 기억, 시작 필터, 테마 같은 사용자 설정 값을 정의합니다.
+- `Models/AppTheme.cs`: 밝은 테마, 어두운 테마 값을 정의합니다.
 - `Models/TodoFilter.cs`: 전체, 진행 중, 완료 필터 값을 정의합니다.
 - `Models/TodoItems.cs`: 할 일 항목의 데이터와 변경 알림 속성을 정의합니다.
+- `Services/AppSettingsService.cs`: 사용자 설정을 JSON 파일로 저장하고 불러옵니다.
+- `Services/ThemeService.cs`: 설정된 테마에 맞게 앱 리소스 딕셔너리를 교체합니다.
 - `Services/TodoStorageService.cs`: 할 일 목록을 JSON 파일로 저장하고 불러옵니다.
 - `Styles/TodoStyles.xaml`: 화면에서 재사용하는 스타일과 할 일 항목 템플릿을 정의합니다.
+- `Styles/Themes/LightTheme.xaml`: 밝은 테마 색상 리소스를 정의합니다.
+- `Styles/Themes/DarkTheme.xaml`: 어두운 테마 색상 리소스를 정의합니다.
 - `TodoWpf.Tests/MainWindowViewModelTests.cs`: ViewModel의 추가, 삭제, 저장, 필터, 검색 동작을 검증합니다.
 - `TodoWpf.csproj`: WPF, .NET, NuGet 패키지 설정을 관리합니다.
 
@@ -114,8 +127,8 @@ dotnet test
 
 ## 다음 학습 과제
 
-- 스타일 리소스 심화
-- 게시, 설치 파일, MSIX 배포
+- 입력 검증 개선
+- 데이터 모델 확장
 
 ## 메모
 

@@ -19,6 +19,9 @@ public partial class MainWindowViewModel : ObservableObject
     private TodoFilter selectedFilter = TodoFilter.All;
 
     [ObservableProperty]
+    private AppTheme theme = AppTheme.Light;
+
+    [ObservableProperty]
     private string searchText = string.Empty;
 
     [ObservableProperty]
@@ -33,6 +36,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     private readonly IAppSettingsService appSettingsService;
     private readonly AppSettings appSettings;
+    private readonly IThemeService themeService;
 
     [ObservableProperty]
     private bool rememberSearchText;
@@ -44,10 +48,12 @@ public partial class MainWindowViewModel : ObservableObject
     // Constructors ---------------------------------
 
     public MainWindowViewModel(ITodoStorageService storageService,
-        IAppSettingsService appSettingsService)
+        IAppSettingsService appSettingsService,
+        IThemeService themeService)
     {
         this.storageService = storageService;
         this.appSettingsService = appSettingsService;
+        this.themeService = themeService;
 
         // load saved data
         var savedTodos = storageService.Load();
@@ -76,6 +82,8 @@ public partial class MainWindowViewModel : ObservableObject
         rememberSearchText = appSettings.RememberSearchText;
         searchText = rememberSearchText ? appSettings.SearchText : string.Empty;
         selectedFilter = appSettings.DefaultFilter;
+        theme = appSettings.Theme;
+        themeService.ApplyTheme(theme);
     }
     // _Constructors
 
@@ -85,7 +93,8 @@ public partial class MainWindowViewModel : ObservableObject
         {
             RememberSearchText = RememberSearchText,
             SearchText = SearchText,
-            DefaultFilter = SelectedFilter
+            DefaultFilter = SelectedFilter,
+            Theme = Theme
         };
     }
 
@@ -111,6 +120,13 @@ public partial class MainWindowViewModel : ObservableObject
     partial void OnSelectedFilterChanged(TodoFilter value)
     {
         TodosView.Refresh();
+    }
+
+    partial void OnThemeChanged(AppTheme value)
+    {
+        appSettings.Theme = value;
+        themeService.ApplyTheme(value);
+        SaveAppSettings();
     }
 
     private bool FilterTodo(object item)
@@ -140,6 +156,7 @@ public partial class MainWindowViewModel : ObservableObject
         appSettings.RememberSearchText = RememberSearchText;
         appSettings.SearchText = RememberSearchText ? SearchText : string.Empty;
         appSettings.DefaultFilter = SelectedFilter;
+        appSettings.Theme = Theme;
 
         appSettingsService.Save(appSettings);
     }
@@ -152,6 +169,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         RememberSearchText = newAppSettings.RememberSearchText;
         SelectedFilter = newAppSettings.DefaultFilter;
+        Theme = newAppSettings.Theme;
 
         SaveAppSettings();
     }

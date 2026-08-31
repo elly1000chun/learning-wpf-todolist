@@ -30,11 +30,13 @@ public class MainWindowViewModelTests
 {
     private static MainWindowViewModel CreateViewModel(
         FakeTodoStorageService? storage = null,
-        FakeAppSettingsService? appSettingsService = null)
+        FakeAppSettingsService? appSettingsService = null,
+        FakeThemeService? themeService = null)
     {
         return new MainWindowViewModel(
             storage ?? new FakeTodoStorageService(),
-            appSettingsService ?? new FakeAppSettingsService());
+            appSettingsService ?? new FakeAppSettingsService(),
+            themeService ?? new FakeThemeService());
     }
 
     private static TodoItem CreateTodo(string title, bool isDone = false)
@@ -503,6 +505,26 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
+    public void Constructor_LoadsThemeAndAppliesTheme()
+    {
+        var storage = new FakeTodoStorageService();
+        var appSettingsService = new FakeAppSettingsService
+        {
+            Settings = new AppSettings
+            {
+                Theme = AppTheme.Dark
+            }
+        };
+        var themeService = new FakeThemeService();
+
+        var viewModel = CreateViewModel(storage, appSettingsService, themeService);
+
+        Assert.Equal(AppTheme.Dark, viewModel.Theme);
+        Assert.Equal(AppTheme.Dark, themeService.LastAppliedTheme);
+        Assert.Equal(1, themeService.ApplyCallCount);
+    }
+
+    [Fact]
     public void SearchText_SavesSettings_WhenRememberSearchTextIsTrue()
     {
         var storage = new FakeTodoStorageService();
@@ -561,5 +583,24 @@ public class MainWindowViewModelTests
         Assert.True(appSettingsService.Settings.RememberSearchText);
         Assert.Equal("wpf", appSettingsService.Settings.SearchText);
         Assert.Equal(TodoFilter.Completed, appSettingsService.Settings.DefaultFilter);
+    }
+
+    [Fact]
+    public void ApplyAppSettings_AppliesTheme()
+    {
+        var storage = new FakeTodoStorageService();
+        var appSettingsService = new FakeAppSettingsService();
+        var themeService = new FakeThemeService();
+        var viewModel = CreateViewModel(storage, appSettingsService, themeService);
+
+        viewModel.ApplyAppSettings(new AppSettings
+        {
+            Theme = AppTheme.Dark
+        });
+
+        Assert.Equal(AppTheme.Dark, viewModel.Theme);
+        Assert.Equal(AppTheme.Dark, themeService.LastAppliedTheme);
+        Assert.Equal(2, themeService.ApplyCallCount);
+        Assert.Equal(AppTheme.Dark, appSettingsService.Settings.Theme);
     }
 }

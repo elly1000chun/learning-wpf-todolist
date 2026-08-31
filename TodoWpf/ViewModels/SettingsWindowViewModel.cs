@@ -15,6 +15,9 @@ public partial class SettingsWindowViewModel : ObservableObject
     [ObservableProperty]
     private TodoFilter defaultFilter;
 
+    [ObservableProperty]
+    private AppTheme theme;
+
     public bool IsSaved { get; private set; }
 
     public SettingsWindowViewModel(AppSettings appSettings)
@@ -22,6 +25,7 @@ public partial class SettingsWindowViewModel : ObservableObject
         rememberSearchText = appSettings.RememberSearchText;
         searchText = appSettings.SearchText;
         defaultFilter = appSettings.DefaultFilter;
+        theme = appSettings.Theme;
     }
 
     public AppSettings ToAppSettings()
@@ -30,7 +34,8 @@ public partial class SettingsWindowViewModel : ObservableObject
         {
             RememberSearchText = RememberSearchText,
             SearchText = RememberSearchText ? SearchText : string.Empty,
-            DefaultFilter = DefaultFilter
+            DefaultFilter = DefaultFilter,
+            Theme = Theme
         };
     }
 

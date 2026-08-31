@@ -2,12 +2,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:models="clr-namespace:TodoWpf.Models">
 
-    <SolidColorBrush x:Key="TodoTextBrush" Color="#222222"/>
-    <SolidColorBrush x:Key="CompletedTodoTextBrush" Color="#808080"/>
-    <SolidColorBrush x:Key="FilterButtonBackgroundBrush" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="SelectedFilterButtonBackgroundBrush" Color="#DDEBFF"/>
-    <SolidColorBrush x:Key="DeleteButtonForegroundBrush" Color="#B00020"/>
-
     <Thickness x:Key="InputTextBoxMargin">0,0,8,0</Thickness>
     <Thickness x:Key="InputTextBoxPadding">10,7</Thickness>
     <Thickness x:Key="FilterButtonPadding">12,5</Thickness>
@@ -20,11 +14,11 @@
     <Style x:Key="TodoTitleTextBlockStyle" TargetType="TextBlock">
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="FontSize" Value="15"/>
-        <Setter Property="Foreground" Value="{StaticResource TodoTextBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
 
         <Style.Triggers>
             <DataTrigger Binding="{Binding IsDone}" Value="True">
-                <Setter Property="Foreground" Value="{StaticResource CompletedTodoTextBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
                 <Setter Property="TextDecorations" Value="Strikethrough"/>
             </DataTrigger>
         </Style.Triggers>
@@ -34,11 +28,14 @@
         <Setter Property="Margin" Value="{StaticResource InputTextBoxMargin}"/>
         <Setter Property="Padding" Value="{StaticResource InputTextBoxPadding}"/>
         <Setter Property="FontSize" Value="15"/>
+        <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource InputForegroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource InputBorderBrush}"/>
     </Style>
 
     <Style x:Key="FilterButtonBaseStyle" TargetType="Button">
         <Setter Property="Padding" Value="{StaticResource FilterButtonPadding}"/>
-        <Setter Property="Background" Value="{StaticResource FilterButtonBackgroundBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
         <Setter Property="FontWeight" Value="Normal"/>
     </Style>
     
@@ -48,7 +45,7 @@
         <Style.Triggers>
             <DataTrigger Binding="{Binding SelectedFilter}"
                          Value="{x:Static models:TodoFilter.All}">
-                <Setter Property="Background" Value="{StaticResource SelectedFilterButtonBackgroundBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource SelectedFilterButtonBackgroundBrush}"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
             </DataTrigger>
         </Style.Triggers>
@@ -60,7 +57,7 @@
         <Style.Triggers>
             <DataTrigger Binding="{Binding SelectedFilter}"
                          Value="{x:Static models:TodoFilter.Active}">
-                <Setter Property="Background" Value="{StaticResource SelectedFilterButtonBackgroundBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource SelectedFilterButtonBackgroundBrush}"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
             </DataTrigger>
         </Style.Triggers>
@@ -72,7 +69,7 @@
         <Style.Triggers>
             <DataTrigger Binding="{Binding SelectedFilter}"
                          Value="{x:Static models:TodoFilter.Completed}">
-                <Setter Property="Background" Value="{StaticResource SelectedFilterButtonBackgroundBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource SelectedFilterButtonBackgroundBrush}"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
             </DataTrigger>
         </Style.Triggers>
@@ -82,10 +79,13 @@
     <Style x:Key="TodoListBoxItemStyle" TargetType="ListBoxItem">
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="Padding" Value="{StaticResource TodoItemPadding}"/>
+        <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}"/>
     </Style>
 
     <Style x:Key="ActionButtonBaseStyle" TargetType="Button">
         <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundBrush}"/>
     </Style>
 
     <Style x:Key="AddButtonStyle"
@@ -104,7 +104,7 @@
            TargetType="Button"
            BasedOn="{StaticResource ActionButtonBaseStyle}">
         <Setter Property="Padding" Value="{StaticResource DeleteButtonPadding}"/>
-        <Setter Property="Foreground" Value="{StaticResource DeleteButtonForegroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource DeleteButtonForegroundBrush}"/>
     </Style>
 
     <Style x:Key="EditPanelStyle" TargetType="Grid">
