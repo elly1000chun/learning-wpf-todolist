@@ -1226,4 +1226,96 @@ public class MainWindowViewModelTests
         Assert.Equal(2, themeService.ApplyCallCount);
         Assert.Equal(AppTheme.Dark, appSettingsService.Settings.Theme);
     }
+
+    [Fact]
+    public void TodoSummaryText_ReturnsTodoCounts()
+    {
+        var storage = new FakeTodoStorageService();
+
+        storage.TodosToLoad.Add(CreateTodo("진행 중인 할 일"));
+        storage.TodosToLoad.Add(CreateTodo("완료된 할 일", isDone: true));
+
+        var viewModel = CreateViewModel(storage);
+
+        Assert.Equal(2, viewModel.TotalTodoCount);
+        Assert.Equal(1, viewModel.CompletedTodoCount);
+        Assert.Equal(1, viewModel.ActiveTodoCount);
+        Assert.Equal("전체 2개, 완료 1개, 진행 중 1개", viewModel.TodoSummaryText);
+    }
+
+    [Fact]
+    public void TodoSummaryText_UpdatesWhenTodoIsCompleted()
+    {
+        var storage = new FakeTodoStorageService();
+
+        storage.TodosToLoad.Add(CreateTodo("진행 중인 할 일"));
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.Todos[0].IsDone = true;
+
+        Assert.Equal(1, viewModel.CompletedTodoCount);
+        Assert.Equal(0, viewModel.ActiveTodoCount);
+        Assert.Equal("전체 1개, 완료 1개, 진행 중 0개", viewModel.TodoSummaryText);
+    }
+
+    [Fact]
+    public void VisibleSummaryText_UpdatesWhenFilterChanges()
+    {
+        var storage = new FakeTodoStorageService();
+
+        storage.TodosToLoad.Add(CreateTodo("진행 중인 할 일"));
+        storage.TodosToLoad.Add(CreateTodo("완료된 할 일", isDone: true));
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.SelectedFilter = TodoFilter.Completed;
+
+        Assert.Equal(1, viewModel.VisibleTodoCount);
+        Assert.Equal("표시 중 1개", viewModel.VisibleSummaryText);
+    }
+
+    [Fact]
+    public void EmptyStateMessage_ReturnsSearchResultMessage_WhenSearchHasNoMatches()
+    {
+        var storage = new FakeTodoStorageService();
+
+        storage.TodosToLoad.Add(CreateTodo("WPF 학습"));
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.SearchText = "없는 검색어";
+
+        Assert.True(viewModel.HasNoVisibleTodos);
+        Assert.Equal(0, viewModel.VisibleTodoCount);
+        Assert.Equal("검색 결과가 없습니다.", viewModel.EmptyStateMessage);
+    }
+
+    [Fact]
+    public void EmptyStateMessage_ReturnsNoTodoMessage_WhenFilterShowsNoTodosWithoutSearch()
+    {
+        var storage = new FakeTodoStorageService();
+
+        storage.TodosToLoad.Add(CreateTodo("진행 중인 할 일"));
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.SelectedFilter = TodoFilter.Completed;
+
+        Assert.True(viewModel.HasNoVisibleTodos);
+        Assert.Equal(0, viewModel.VisibleTodoCount);
+        Assert.Equal("표시할 할 일이 없습니다.", viewModel.EmptyStateMessage);
+    }
+
+    [Fact]
+    public void SaveStatusMessage_UpdatesWhenTodoIsSaved()
+    {
+        var storage = new FakeTodoStorageService();
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.NewTodoTitle = "새 할 일";
+        viewModel.AddTodoCommand.Execute(null);
+
+        Assert.StartsWith("저장됨 ", viewModel.SaveStatusMessage);
+    }
 }

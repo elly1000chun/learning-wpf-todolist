@@ -53,6 +53,9 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private string editTodoTitleErrorMessage = string.Empty;
 
+    [ObservableProperty]
+    private string saveStatusMessage = "저장됨";
+
 
     private readonly ITodoStorageService storageService;
     private readonly IAppSettingsService appSettingsService;
@@ -67,6 +70,27 @@ public partial class MainWindowViewModel : ObservableObject
     public ObservableCollection<TodoItem> Todos { get; } = new();
 
     public ICollectionView TodosView { get; }
+
+    public int TotalTodoCount => Todos.Count;
+
+    public int CompletedTodoCount => Todos.Count(todo => todo.IsDone);
+
+    public int ActiveTodoCount => Todos.Count(todo => !todo.IsDone);
+
+    public int VisibleTodoCount => TodosView is null
+        ? Todos.Count
+        : TodosView.Cast<TodoItem>().Count();
+
+    public string TodoSummaryText =>
+        $"전체 {TotalTodoCount}개, 완료 {CompletedTodoCount}개, 진행 중 {ActiveTodoCount}개";
+
+    public string VisibleSummaryText => $"표시 중 {VisibleTodoCount}개";
+
+    public bool HasNoVisibleTodos => VisibleTodoCount == 0;
+
+    public string EmptyStateMessage => string.IsNullOrWhiteSpace(SearchText)
+        ? "표시할 할 일이 없습니다."
+        : "검색 결과가 없습니다.";
 
     // Constructors ---------------------------------
 
@@ -110,6 +134,7 @@ public partial class MainWindowViewModel : ObservableObject
         theme = appSettings.Theme;
         themeService.ApplyTheme(theme);
         ApplySort();
+        RefreshTodoFeedback();
     }
     // _Constructors
 
@@ -131,17 +156,20 @@ public partial class MainWindowViewModel : ObservableObject
     {
         item.PropertyChanged += OnTodoItemPropertyChanged;
         Todos.Add(item);
+        RefreshTodoFeedback();
     }
 
     private void RemoveTodoItem(TodoItem item)
     {
         item.PropertyChanged -= OnTodoItemPropertyChanged;
         Todos.Remove(item);
+        RefreshTodoFeedback();
     }
 
     private void SaveTodos()
     {
         storageService.Save(Todos);
+        UpdateSaveStatus();
     }
 
     private void SaveAppSettings()
@@ -153,6 +181,24 @@ public partial class MainWindowViewModel : ObservableObject
         appSettings.DefaultSortOption = SelectedSort;
 
         appSettingsService.Save(appSettings);
+        UpdateSaveStatus();
+    }
+
+    private void UpdateSaveStatus()
+    {
+        SaveStatusMessage = $"저장됨 {DateTime.Now:HH:mm:ss}";
+    }
+
+    private void RefreshTodoFeedback()
+    {
+        OnPropertyChanged(nameof(TotalTodoCount));
+        OnPropertyChanged(nameof(CompletedTodoCount));
+        OnPropertyChanged(nameof(ActiveTodoCount));
+        OnPropertyChanged(nameof(VisibleTodoCount));
+        OnPropertyChanged(nameof(TodoSummaryText));
+        OnPropertyChanged(nameof(VisibleSummaryText));
+        OnPropertyChanged(nameof(HasNoVisibleTodos));
+        OnPropertyChanged(nameof(EmptyStateMessage));
     }
 
     public void ApplyAppSettings(AppSettings newAppSettings)
@@ -204,11 +250,13 @@ public partial class MainWindowViewModel : ObservableObject
     partial void OnSelectedFilterChanged(TodoFilter value)
     {
         TodosView.Refresh();
+        RefreshTodoFeedback();
     }
 
     partial void OnSelectedDueDateFilterChanged(TodoDueDateFilter value)
     {
         TodosView.Refresh();
+        RefreshTodoFeedback();
     }
 
     partial void OnSelectedSortChanged(TodoSortOption value)
@@ -369,12 +417,14 @@ public partial class MainWindowViewModel : ObservableObject
 
         SaveTodos();
         TodosView.Refresh();
+        RefreshTodoFeedback();
         ClearCompletedCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnSearchTextChanged(string value)
     {
         TodosView.Refresh();
+        RefreshTodoFeedback();
 
         if (RememberSearchText)
         {
@@ -479,6 +529,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         SaveTodos();
         TodosView.Refresh();
+        RefreshTodoFeedback();
 
         EditingTodo = null;
         EditTodoTitle = string.Empty;
