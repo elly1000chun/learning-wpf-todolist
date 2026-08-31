@@ -24,6 +24,32 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="TodoMetadataTextBlockStyle" TargetType="TextBlock">
+        <Setter Property="Margin" Value="0,4,0,0"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+    </Style>
+
+    <Style x:Key="TodoUpdatedAtTextBlockStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource TodoMetadataTextBlockStyle}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding UpdatedAt}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="TodoDueDateTextBlockStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource TodoMetadataTextBlockStyle}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding DueDate}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
     <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
         <Setter Property="Margin" Value="{StaticResource InputTextBoxMargin}"/>
         <Setter Property="Padding" Value="{StaticResource InputTextBoxPadding}"/>
@@ -143,9 +169,21 @@
                       VerticalAlignment="Center"
                       IsChecked="{Binding IsDone}"/>
 
-            <TextBlock Grid.Column="1"
-                       Text="{Binding Title}"
-                       Style="{StaticResource TodoTitleTextBlockStyle}"/>
+            <StackPanel Grid.Column="1"
+                        VerticalAlignment="Center">
+                <TextBlock Text="{Binding Title}"
+                           Style="{StaticResource TodoTitleTextBlockStyle}"/>
+
+                <TextBlock Text="{Binding CreatedAt, StringFormat=작성일: {0:yyyy-MM-dd HH:mm}}"
+                           Style="{StaticResource TodoMetadataTextBlockStyle}"/>
+
+                <TextBlock Text="{Binding UpdatedAt, StringFormat=수정일: {0:yyyy-MM-dd HH:mm}}"
+                           Style="{StaticResource TodoUpdatedAtTextBlockStyle}"/>
+
+                <TextBlock Text="{Binding DueDate, StringFormat=마감일: {0:yyyy-MM-dd}}"
+                           Style="{StaticResource TodoDueDateTextBlockStyle}"/>
+            </StackPanel>
+
             <Button Grid.Column="2"
                     Style="{StaticResource SmallButtonStyle}"
                     Content="수정"

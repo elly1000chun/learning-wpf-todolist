@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System;
 using TodoWpf.Models;
 using TodoWpf.Services;
 using TodoWpf.ViewModels;
@@ -76,6 +77,23 @@ public class MainWindowViewModelTests
         Assert.Equal(string.Empty, viewModel.NewTodoTitle);
         Assert.Equal(1, storage.SaveCallCount);
         Assert.Contains(storage.LastSavedTodos, todo => todo.Title == "새 테스트 할 일");
+    }
+
+    [Fact]
+    public void AddTodoCommand_SetsCreatedAt()
+    {
+        var storage = new FakeTodoStorageService();
+        var viewModel = CreateViewModel(storage);
+
+        var before = DateTime.Now;
+
+        viewModel.NewTodoTitle = "작성일 테스트";
+        viewModel.AddTodoCommand.Execute(null);
+
+        var after = DateTime.Now;
+        var todo = Assert.Single(viewModel.Todos, todo => todo.Title == "작성일 테스트");
+
+        Assert.InRange(todo.CreatedAt, before, after);
     }
 
     [Fact]
@@ -213,6 +231,29 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
+    public void TodoIsDoneChanged_SetsUpdatedAt()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var todo = CreateTodo("완료일 테스트");
+
+        storage.TodosToLoad.Add(todo);
+
+        var viewModel = CreateViewModel(storage);
+
+        var before = DateTime.Now;
+
+        todo.IsDone = true;
+
+        var after = DateTime.Now;
+
+        Assert.NotNull(todo.UpdatedAt);
+        Assert.InRange(todo.UpdatedAt.Value, before, after);
+        Assert.Equal(1, storage.SaveCallCount);
+        Assert.Equal(todo.UpdatedAt, storage.LastSavedTodos[0].UpdatedAt);
+    }
+
+    [Fact]
     public void SelectedFilter_Completed_ShowsOnlyCompletedTodos()
     {
         var storage = new FakeTodoStorageService();
@@ -340,6 +381,32 @@ public class MainWindowViewModelTests
         Assert.Equal(string.Empty, viewModel.EditTodoTitle);
         Assert.Equal(1, storage.SaveCallCount);
         Assert.Equal("수정 후 할 일", storage.LastSavedTodos[0].Title);
+    }
+
+    [Fact]
+    public void SaveEditCommand_SetsUpdatedAt()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var todo = CreateTodo("수정 전 할 일");
+
+        storage.TodosToLoad.Add(todo);
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.StartEditCommand.Execute(todo);
+        viewModel.EditTodoTitle = "수정 후 할 일";
+
+        var before = DateTime.Now;
+
+        viewModel.SaveEditCommand.Execute(null);
+
+        var after = DateTime.Now;
+
+        Assert.NotNull(todo.UpdatedAt);
+        Assert.InRange(todo.UpdatedAt.Value, before, after);
+        Assert.Equal(1, storage.SaveCallCount);
+        Assert.Equal(todo.UpdatedAt, storage.LastSavedTodos[0].UpdatedAt);
     }
 
     [Fact]

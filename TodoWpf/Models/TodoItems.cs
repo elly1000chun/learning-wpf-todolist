@@ -9,6 +9,15 @@ namespace TodoWpf.Models
 
         [ObservableProperty]
         private bool isDone;
+
+        [ObservableProperty]
+        private DateTime createdAt = DateTime.Now;
+
+        [ObservableProperty]
+        private DateTime? updatedAt;
+
+        [ObservableProperty]
+        private DateTime? dueDate;
     }
 }
 

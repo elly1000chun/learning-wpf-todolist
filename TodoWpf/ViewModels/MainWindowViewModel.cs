@@ -45,6 +45,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly IAppSettingsService appSettingsService;
     private readonly AppSettings appSettings;
     private readonly IThemeService themeService;
+    private bool isUpdatingTodo;
 
     [ObservableProperty]
     private bool rememberSearchText;
@@ -249,6 +250,23 @@ public partial class MainWindowViewModel : ObservableObject
     // partial methods 
     private void OnTodoItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (isUpdatingTodo)
+            return;
+
+        if (sender is TodoItem todo && e.PropertyName == nameof(TodoItem.IsDone))
+        {
+            isUpdatingTodo = true;
+
+            try
+            {
+                todo.UpdatedAt = DateTime.Now;
+            }
+            finally
+            {
+                isUpdatingTodo = false;
+            }
+        }
+
         SaveTodos();
         TodosView.Refresh();
         ClearCompletedCommand.NotifyCanExecuteChanged();
@@ -282,7 +300,8 @@ public partial class MainWindowViewModel : ObservableObject
 
         var todo = new TodoItem
         {
-            Title = normalizedTitle
+            Title = normalizedTitle,
+            CreatedAt = DateTime.Now
         };
 
         AddTodoItem(todo);
@@ -341,7 +360,20 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         }
 
-        EditingTodo.Title = NormalizeTodoTitle(EditTodoTitle);
+        isUpdatingTodo = true;
+
+        try
+        {
+            EditingTodo.Title = NormalizeTodoTitle(EditTodoTitle);
+            EditingTodo.UpdatedAt = DateTime.Now;
+        }
+        finally
+        {
+            isUpdatingTodo = false;
+        }
+
+        SaveTodos();
+        TodosView.Refresh();
 
         EditingTodo = null;
         EditTodoTitle = string.Empty;
