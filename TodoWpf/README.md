@@ -63,9 +63,11 @@ learning-wpf-todolist/
 │  │  └─ TodoItems.cs
 │  ├─ Services/
 │  │  ├─ AppSettingsService.cs
+│  │  ├─ TodoFeedbackService.cs
 │  │  ├─ TodoFilterService.cs
 │  │  ├─ ThemeService.cs
 │  │  ├─ TodoSortService.cs
+│  │  ├─ TodoTitleValidationService.cs
 │  │  └─ TodoStorageService.cs
 │  ├─ Styles/
 │  │  ├─ Themes/
@@ -83,8 +85,10 @@ learning-wpf-todolist/
 │  ├─ MainWindowViewModelTests.cs
 │  ├─ SettingsWindowViewModelTests.cs
 │  ├─ TestFileHelper.cs
+│  ├─ TodoFeedbackServiceTests.cs
 │  ├─ TodoFilterServiceTests.cs
 │  ├─ TodoSortServiceTests.cs
+│  ├─ TodoTitleValidationServiceTests.cs
 │  ├─ TodoStorageServiceTests.cs
 │  └─ TodoWpf.Tests.csproj
 └─ docs/
@@ -106,17 +110,21 @@ learning-wpf-todolist/
 - `Models/TodoSortOption.cs`: 최신순, 오래된순, 제목순, 미완료순, 마감일순 정렬 옵션을 정의합니다.
 - `Models/TodoItems.cs`: 할 일 제목, 완료 여부, 작성일, 수정일, 마감일 같은 항목 데이터를 정의합니다.
 - `Services/AppSettingsService.cs`: 사용자 설정을 JSON 파일로 저장하고 불러옵니다.
+- `Services/TodoFeedbackService.cs`: 항목 개수 요약, 빈 상태 메시지, 저장 상태 문구를 생성합니다.
 - `Services/TodoFilterService.cs`: 상태, 마감일, 검색어 조건을 조합해 할 일이 화면에 표시될지 판단합니다.
 - `Services/ThemeService.cs`: 설정된 테마에 맞게 앱 리소스 딕셔너리를 교체합니다.
 - `Services/TodoSortService.cs`: 정렬 옵션에 맞는 정렬 규칙을 제공합니다.
+- `Services/TodoTitleValidationService.cs`: 할 일 제목 공백 제거, 길이 제한, 오류 메시지 생성을 담당합니다.
 - `Services/TodoStorageService.cs`: 할 일 목록을 JSON 파일로 저장하고 불러옵니다.
 - `Styles/TodoStyles.xaml`: 화면에서 재사용하는 입력 컨트롤, 버튼, 안내 문구 스타일과 할 일 항목 템플릿을 정의합니다.
 - `Styles/Themes/LightTheme.xaml`: 밝은 테마 색상 리소스를 정의합니다.
 - `Styles/Themes/DarkTheme.xaml`: 어두운 테마 색상 리소스를 정의합니다.
 - `TodoWpf.Tests/MainWindowViewModelTests.cs`: 메인 ViewModel의 추가, 삭제, 저장, 필터, 검색, 정렬, 편집, 입력 검증 동작을 검증합니다.
 - `TodoWpf.Tests/SettingsWindowViewModelTests.cs`: 설정 창 ViewModel의 설정 복사, 저장, 취소 동작을 검증합니다.
+- `TodoWpf.Tests/TodoFeedbackServiceTests.cs`: 상태 피드백 문구 생성 규칙을 검증합니다.
 - `TodoWpf.Tests/TodoFilterServiceTests.cs`: 상태, 마감일, 검색어 필터 판단 규칙을 검증합니다.
 - `TodoWpf.Tests/TodoSortServiceTests.cs`: 정렬 옵션별 정렬 규칙 생성을 검증합니다.
+- `TodoWpf.Tests/TodoTitleValidationServiceTests.cs`: 제목 검증과 오류 메시지 규칙을 검증합니다.
 - `TodoWpf.Tests/TodoStorageServiceTests.cs`: 할 일 JSON 저장소의 저장, 불러오기, 예외 상황 복구를 검증합니다.
 - `TodoWpf.Tests/AppSettingsServiceTests.cs`: 사용자 설정 JSON 저장소의 저장, 불러오기, 기본값 복구를 검증합니다.
 - `TodoWpf.Tests/TestFileHelper.cs`: 서비스 테스트에서 사용할 임시 파일 경로를 만듭니다.
@@ -145,7 +153,7 @@ cd D:\Dev\WPF\learning-wpf-todolist
 dotnet test
 ```
 
-현재 테스트는 `MainWindowViewModel`, `SettingsWindowViewModel`, `TodoFilterService`, `TodoSortService`, `TodoStorageService`, `AppSettingsService`를 대상으로 합니다. ViewModel 테스트에서는 실제 JSON 파일을 쓰지 않도록 fake service를 사용하고, Service 테스트에서는 임시 파일 경로를 주입해 저장, 불러오기, 폴더 생성, 깨진 JSON 복구, 들여쓰기 JSON 출력을 검증합니다. 시작 필터, 마감일 필터, 기본 정렬, 검색어 기억, 테마 설정이 저장되고 다시 적용되는지와 상태 피드백 문구가 갱신되는지도 함께 확인합니다.
+현재 테스트는 `MainWindowViewModel`, `SettingsWindowViewModel`, `TodoFeedbackService`, `TodoFilterService`, `TodoSortService`, `TodoTitleValidationService`, `TodoStorageService`, `AppSettingsService`를 대상으로 합니다. ViewModel 테스트에서는 실제 JSON 파일을 쓰지 않도록 fake service를 사용하고, Service 테스트에서는 임시 파일 경로를 주입해 저장, 불러오기, 폴더 생성, 깨진 JSON 복구, 들여쓰기 JSON 출력을 검증합니다. 시작 필터, 마감일 필터, 기본 정렬, 검색어 기억, 테마 설정이 저장되고 다시 적용되는지와 상태 피드백 문구가 갱신되는지도 함께 확인합니다.
 
 ## 사용 기술
 
@@ -162,8 +170,8 @@ dotnet test
 
 ## 다음 학습 과제
 
-- 서비스 테스트 심화 2차
 - UI 품질 개선 2차
+- 카테고리 또는 우선순위 추가
 
 ## 메모
 

@@ -11,9 +11,6 @@ namespace TodoWpf.ViewModels;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    // Constants---------------------------------
-    private const int MaxTodoTitleLength = 100;
-
     // Properties ---------------------------------
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(AddTodoCommand))]
@@ -54,7 +51,7 @@ public partial class MainWindowViewModel : ObservableObject
     private string editTodoTitleErrorMessage = string.Empty;
 
     [ObservableProperty]
-    private string saveStatusMessage = "저장됨";
+    private string saveStatusMessage = TodoFeedbackService.DefaultSaveStatusMessage;
 
 
     private readonly ITodoStorageService storageService;
@@ -82,15 +79,18 @@ public partial class MainWindowViewModel : ObservableObject
         : TodosView.Cast<TodoItem>().Count();
 
     public string TodoSummaryText =>
-        $"전체 {TotalTodoCount}개, 완료 {CompletedTodoCount}개, 진행 중 {ActiveTodoCount}개";
+        TodoFeedbackService.CreateTodoSummaryText(
+            TotalTodoCount,
+            CompletedTodoCount,
+            ActiveTodoCount);
 
-    public string VisibleSummaryText => $"표시 중 {VisibleTodoCount}개";
+    public string VisibleSummaryText =>
+        TodoFeedbackService.CreateVisibleSummaryText(VisibleTodoCount);
 
     public bool HasNoVisibleTodos => VisibleTodoCount == 0;
 
-    public string EmptyStateMessage => string.IsNullOrWhiteSpace(SearchText)
-        ? "표시할 할 일이 없습니다."
-        : "검색 결과가 없습니다.";
+    public string EmptyStateMessage =>
+        TodoFeedbackService.CreateEmptyStateMessage(SearchText);
 
     // Constructors ---------------------------------
 
@@ -186,7 +186,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     private void UpdateSaveStatus()
     {
-        SaveStatusMessage = $"저장됨 {DateTime.Now:HH:mm:ss}";
+        SaveStatusMessage = TodoFeedbackService.CreateSaveStatusMessage(DateTime.Now);
     }
 
     private void RefreshTodoFeedback()
@@ -214,37 +214,6 @@ public partial class MainWindowViewModel : ObservableObject
 
         SaveAppSettings();
     }
-
-    private static string NormalizeTodoTitle(string title)
-    {
-        return title.Trim();
-    }
-
-    private static bool IsValidTodoTitle(string title)
-    {
-        var normalizedTitle = NormalizeTodoTitle(title);
-
-        return normalizedTitle.Length > 0 &&
-               normalizedTitle.Length <= MaxTodoTitleLength;
-    }
-
-    private static string GetTodoTitleErrorMessage(string title)
-    {
-        var normalizedTitle = NormalizeTodoTitle(title);
-
-        if (normalizedTitle.Length == 0)
-        {
-            return "제목을 입력하세요.";
-        }
-
-        if (normalizedTitle.Length > MaxTodoTitleLength)
-        {
-            return $"제목은 {MaxTodoTitleLength}자 이하로 입력하세요.";
-        }
-
-        return string.Empty;
-    }
-
 
     // Partial methods -------------------------
     partial void OnSelectedFilterChanged(TodoFilter value)
@@ -296,23 +265,23 @@ public partial class MainWindowViewModel : ObservableObject
 
     partial void OnNewTodoTitleChanged(string value)
     {
-        NewTodoTitleErrorMessage = GetTodoTitleErrorMessage(value);
+        NewTodoTitleErrorMessage = TodoTitleValidationService.GetErrorMessage(value);
     }
     partial void OnEditTodoTitleChanged(string value)
     {
-        EditTodoTitleErrorMessage = GetTodoTitleErrorMessage(value);
+        EditTodoTitleErrorMessage = TodoTitleValidationService.GetErrorMessage(value);
     }
 
     // Can methods for commands
     private bool CanAddTodo()
     {
-        return IsValidTodoTitle(NewTodoTitle);
+        return TodoTitleValidationService.IsValid(NewTodoTitle);
     }
 
     private bool CanSaveEdit()
     {
         return EditingTodo is not null &&
-               IsValidTodoTitle(EditTodoTitle);
+               TodoTitleValidationService.IsValid(EditTodoTitle);
     }
 
     private bool CanClearCompleted()
@@ -371,10 +340,10 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanAddTodo))]
     private void AddTodo()
     {
-        var normalizedTitle = NormalizeTodoTitle(NewTodoTitle);
-        if (!IsValidTodoTitle(NewTodoTitle))
+        var normalizedTitle = TodoTitleValidationService.Normalize(NewTodoTitle);
+        if (!TodoTitleValidationService.IsValid(NewTodoTitle))
         {
-            NewTodoTitleErrorMessage = GetTodoTitleErrorMessage(NewTodoTitle);
+            NewTodoTitleErrorMessage = TodoTitleValidationService.GetErrorMessage(NewTodoTitle);
             return;
         }
 
@@ -438,9 +407,9 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanSaveEdit))]
     private void SaveEdit()
     {
-        if (EditingTodo is null || !IsValidTodoTitle(EditTodoTitle))
+        if (EditingTodo is null || !TodoTitleValidationService.IsValid(EditTodoTitle))
         {
-            EditTodoTitleErrorMessage = GetTodoTitleErrorMessage(EditTodoTitle);
+            EditTodoTitleErrorMessage = TodoTitleValidationService.GetErrorMessage(EditTodoTitle);
             return;
         }
 
@@ -448,7 +417,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         try
         {
-            EditingTodo.Title = NormalizeTodoTitle(EditTodoTitle);
+            EditingTodo.Title = TodoTitleValidationService.Normalize(EditTodoTitle);
             EditingTodo.DueDate = EditTodoDueDate;
             EditingTodo.UpdatedAt = DateTime.Now;
         }
