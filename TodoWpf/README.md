@@ -92,6 +92,7 @@ learning-wpf-todolist/
 │  ├─ TodoStorageServiceTests.cs
 │  └─ TodoWpf.Tests.csproj
 └─ docs/
+   ├─ release-checklist.md
    └─ wpf-csharp-development-guide.md
 ```
 
@@ -167,12 +168,31 @@ dotnet test
 ## 학습 문서
 
 - [WPF C# 개발환경 가이드](../docs/wpf-csharp-development-guide.md): 개발 환경 선택부터 MVVM 할 일 앱 구현 흐름까지 정리한 최초 학습 노트입니다.
+- [릴리스 전 점검 체크리스트](../docs/release-checklist.md): 테스트, Release 빌드, 게시, 실행 확인, 문서 점검 순서를 정리한 마무리 루틴입니다.
 
-## 다음 학습 과제
+## 릴리스 전 점검
 
-- UI 품질 개선 2차
-- 카테고리 또는 우선순위 추가
+배포하거나 백업하기 전에는 다음 순서로 확인합니다.
+
+```powershell
+cd D:\Dev\WPF\learning-wpf-todolist
+git status
+dotnet test .\TodoWpf.Tests\TodoWpf.Tests.csproj --no-restore
+dotnet build .\TodoWpf\TodoWpf.csproj --configuration Release --no-restore
+dotnet publish .\TodoWpf\TodoWpf.csproj --configuration Release --no-restore
+```
+
+게시 후에는 `TodoWpf\bin\Release\net10.0-windows\publish\TodoWpf.exe`를 실행해 추가, 수정, 삭제, 필터, 검색, 정렬, 설정 저장, 테마 적용을 수동으로 확인합니다.
+
+## 보류 학습 후보
+
+이번 학습 흐름에서는 아래 항목을 진행하지 않고 남겨둡니다.
+
+- UI 품질 개선 2차: 목록 빈 상태, 버튼 배치, 항목 템플릿을 더 세밀하게 다듬기
+- 카테고리 또는 우선순위 추가: enum, ComboBox 바인딩, 저장, 필터 확장 복습
+- 상태 표시 개선: 저장 중, 저장 실패 같은 상태를 사용자에게 보여주기
+- 검색/필터 프리셋: 자주 쓰는 필터 조합 저장과 빠른 적용
 
 ## 메모
 
-이 프로젝트는 학습용이므로 기능을 크게 늘리기보다, WPF와 MVVM의 기본 개념을 작은 단위로 반복해서 익히는 것을 우선합니다.
+이 프로젝트는 WPF와 MVVM의 기본 개념을 작은 단위로 반복해서 익히기 위한 학습용 앱입니다. 현재 학습 흐름은 릴리스 전 점검 루틴까지 정리한 상태로 마무리합니다.
