@@ -28,18 +28,32 @@ public class FakeTodoStorageService : ITodoStorageService
 
 public class MainWindowViewModelTests
 {
+    private static MainWindowViewModel CreateViewModel(
+        FakeTodoStorageService? storage = null,
+        FakeAppSettingsService? appSettingsService = null)
+    {
+        return new MainWindowViewModel(
+            storage ?? new FakeTodoStorageService(),
+            appSettingsService ?? new FakeAppSettingsService());
+    }
+
+    private static TodoItem CreateTodo(string title, bool isDone = false)
+    {
+        return new TodoItem
+        {
+            Title = title,
+            IsDone = isDone
+        };
+    }
+
     [Fact]
     public void Constructor_LoadsSavedTodos()
     {
         var storage = new FakeTodoStorageService();
 
-        storage.TodosToLoad.Add(new TodoItem
-        {
-            Title = "테스트 할 일",
-            IsDone = true
-        });
+        storage.TodosToLoad.Add(CreateTodo("테스트 할 일", isDone: true));
 
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         Assert.Single(viewModel.Todos);
         Assert.Equal("테스트 할 일", viewModel.Todos[0].Title);
@@ -50,7 +64,7 @@ public class MainWindowViewModelTests
     public void AddTodoCommand_AddsTodoAndSaves()
     {
         var storage = new FakeTodoStorageService();
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         viewModel.NewTodoTitle = "새 테스트 할 일";
 
@@ -66,7 +80,7 @@ public class MainWindowViewModelTests
     public void AddTodoCommand_DoesNotAddTodo_WhenTitleIsWhiteSpace()
     {
         var storage = new FakeTodoStorageService();
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         var originalCount = viewModel.Todos.Count;
 
@@ -85,14 +99,11 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        var todo = new TodoItem
-        {
-            Title = "삭제할 할 일"
-        };
+        var todo = CreateTodo("삭제할 할 일");
 
         storage.TodosToLoad.Add(todo);
 
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         viewModel.RemoveTodoCommand.Execute(todo);
 
@@ -105,7 +116,7 @@ public class MainWindowViewModelTests
     public void RemoveTodoCommand_DoesNothing_WhenTodoIsNull()
     {
         var storage = new FakeTodoStorageService();
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         var originalCount = viewModel.Todos.Count;
 
@@ -120,15 +131,11 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        var todo = new TodoItem
-        {
-            Title = "완료 처리할 할 일",
-            IsDone = false
-        };
+        var todo = CreateTodo("완료 처리할 할 일");
 
         storage.TodosToLoad.Add(todo);
 
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         todo.IsDone = true;
 
@@ -141,19 +148,10 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        storage.TodosToLoad.Add(new TodoItem
-        {
-            Title = "진행 중 할 일",
-            IsDone = false
-        });
+        storage.TodosToLoad.Add(CreateTodo("진행 중 할 일"));
+        storage.TodosToLoad.Add(CreateTodo("완료된 할 일", isDone: true));
 
-        storage.TodosToLoad.Add(new TodoItem
-        {
-            Title = "완료된 할 일",
-            IsDone = true
-        });
-
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         viewModel.SelectedFilter = TodoFilter.Completed;
 
@@ -168,19 +166,10 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        storage.TodosToLoad.Add(new TodoItem
-        {
-            Title = "진행 중 할 일",
-            IsDone = false
-        });
+        storage.TodosToLoad.Add(CreateTodo("진행 중 할 일"));
+        storage.TodosToLoad.Add(CreateTodo("완료된 할 일", isDone: true));
 
-        storage.TodosToLoad.Add(new TodoItem
-        {
-            Title = "완료된 할 일",
-            IsDone = true
-        });
-
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         viewModel.SelectedFilter = TodoFilter.Active;
 
@@ -196,17 +185,10 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        storage.TodosToLoad.Add(new TodoItem
-        {
-            Title = "WPF 데이터 바인딩 공부"
-        });
+        storage.TodosToLoad.Add(CreateTodo("WPF 데이터 바인딩 공부"));
+        storage.TodosToLoad.Add(CreateTodo("C# 문법 복습"));
 
-        storage.TodosToLoad.Add(new TodoItem
-        {
-            Title = "C# 문법 복습"
-        });
-
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         viewModel.SearchText = "wpf";
 
@@ -223,29 +205,14 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        storage.TodosToLoad.Add(new TodoItem
-        {
-            Title = "WPF 데이터 바인딩 공부",
-            IsDone = false
-        });
+        storage.TodosToLoad.Add(CreateTodo("WPF 데이터 바인딩 공부"));
+        storage.TodosToLoad.Add(CreateTodo("WPF 테스트 공부", isDone: true));
+        storage.TodosToLoad.Add(CreateTodo("C# 문법 복습", isDone: true));
 
-        storage.TodosToLoad.Add(new TodoItem
-        {
-            Title = "WPF 테스트 공부",
-            IsDone = true
-        });
+        var viewModel = CreateViewModel(storage);
 
-        storage.TodosToLoad.Add(new TodoItem
-        {
-            Title = "C# 문법 복습",
-            IsDone = true
-        });
-
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService())
-        {
-            SelectedFilter = TodoFilter.Completed,
-            SearchText = "wpf"
-        };
+        viewModel.SelectedFilter = TodoFilter.Completed;
+        viewModel.SearchText = "wpf";
         
         var visibleTodos = viewModel.TodosView.Cast<TodoItem>().ToList();
 
@@ -257,10 +224,9 @@ public class MainWindowViewModelTests
     public void ClearSearchCommand_ClearsSearchText()
     {
         var storage = new FakeTodoStorageService();
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService())
-        {
-            SearchText = "wpf"
-        };     
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.SearchText = "wpf";
 
         viewModel.ClearSearchCommand.Execute(null);
 
@@ -272,14 +238,11 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        var todo = new TodoItem
-        {
-            Title = "수정 전 할 일"
-        };
+        var todo = CreateTodo("수정 전 할 일");
 
         storage.TodosToLoad.Add(todo);
 
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         viewModel.StartEditCommand.Execute(todo);
 
@@ -292,14 +255,11 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        var todo = new TodoItem
-        {
-            Title = "수정 전 할 일"
-        };
+        var todo = CreateTodo("수정 전 할 일");
 
         storage.TodosToLoad.Add(todo);
 
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         viewModel.StartEditCommand.Execute(todo);
         viewModel.EditTodoTitle = "수정 후 할 일";
@@ -318,14 +278,11 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        var todo = new TodoItem
-        {
-            Title = "수정 전 할 일"
-        };
+        var todo = CreateTodo("수정 전 할 일");
 
         storage.TodosToLoad.Add(todo);
 
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         viewModel.StartEditCommand.Execute(todo);
         viewModel.EditTodoTitle = "수정하려던 제목";
@@ -343,14 +300,11 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        var todo = new TodoItem
-        {
-            Title = "수정 전 할 일"
-        };
+        var todo = CreateTodo("수정 전 할 일");
 
         storage.TodosToLoad.Add(todo);
 
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         viewModel.StartEditCommand.Execute(todo);
         viewModel.EditTodoTitle = "   ";
@@ -363,14 +317,11 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        var todo = new TodoItem
-        {
-            Title = "삭제할 편집 중 할 일"
-        };
+        var todo = CreateTodo("삭제할 편집 중 할 일");
 
         storage.TodosToLoad.Add(todo);
 
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         viewModel.StartEditCommand.Execute(todo);
         viewModel.EditTodoTitle = "수정 중인 제목";
@@ -388,22 +339,14 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        var activeTodo = new TodoItem
-        {
-            Title = "진행 중 할 일",
-            IsDone = false
-        };
+        var activeTodo = CreateTodo("진행 중 할 일");
 
-        var completedTodo = new TodoItem
-        {
-            Title = "완료된 할 일",
-            IsDone = true
-        };
+        var completedTodo = CreateTodo("완료된 할 일", isDone: true);
 
         storage.TodosToLoad.Add(activeTodo);
         storage.TodosToLoad.Add(completedTodo);
 
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         viewModel.ClearCompletedCommand.Execute(null);
 
@@ -422,13 +365,9 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        storage.TodosToLoad.Add(new TodoItem
-        {
-            Title = "진행 중 할 일",
-            IsDone = false
-        });
+        storage.TodosToLoad.Add(CreateTodo("진행 중 할 일"));
 
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         Assert.False(viewModel.ClearCompletedCommand.CanExecute(null));
     }
@@ -438,15 +377,11 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        var todo = new TodoItem
-        {
-            Title = "편집 중 완료 할 일",
-            IsDone = true
-        };
+        var todo = CreateTodo("편집 중 완료 할 일", isDone: true);
 
         storage.TodosToLoad.Add(todo);
 
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         viewModel.StartEditCommand.Execute(todo);
         viewModel.EditTodoTitle = "수정 중인 제목";
@@ -464,18 +399,10 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        storage.TodosToLoad.Add(new TodoItem
-        {
-            Title = "첫 번째 할 일"
-        });
+        storage.TodosToLoad.Add(CreateTodo("첫 번째 할 일"));
+        storage.TodosToLoad.Add(CreateTodo("두 번째 할 일", isDone: true));
 
-        storage.TodosToLoad.Add(new TodoItem
-        {
-            Title = "두 번째 할 일",
-            IsDone = true
-        });
-
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         viewModel.ClearAllCommand.Execute(null);
 
@@ -489,14 +416,11 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        var todo = new TodoItem
-        {
-            Title = "편집 중인 할 일"
-        };
+        var todo = CreateTodo("편집 중인 할 일");
 
         storage.TodosToLoad.Add(todo);
 
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         viewModel.StartEditCommand.Execute(todo);
         viewModel.EditTodoTitle = "수정 중인 제목";
@@ -514,12 +438,9 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
 
-        storage.TodosToLoad.Add(new TodoItem
-        {
-            Title = "삭제할 할 일"
-        });
+        storage.TodosToLoad.Add(CreateTodo("삭제할 할 일"));
 
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService());
+        var viewModel = CreateViewModel(storage);
 
         viewModel.ClearAllCommand.Execute(null);
 
@@ -539,7 +460,7 @@ public class MainWindowViewModelTests
             }
         };
 
-        var viewModel = new MainWindowViewModel(storage, appSettingsService);
+        var viewModel = CreateViewModel(storage, appSettingsService);
 
         Assert.True(viewModel.RememberSearchText);
         Assert.Equal("wpf", viewModel.SearchText);
@@ -558,7 +479,7 @@ public class MainWindowViewModelTests
             }
         };
 
-        var viewModel = new MainWindowViewModel(storage, appSettingsService);
+        var viewModel = CreateViewModel(storage, appSettingsService);
 
         Assert.False(viewModel.RememberSearchText);
         Assert.Equal(string.Empty, viewModel.SearchText);
@@ -576,7 +497,7 @@ public class MainWindowViewModelTests
             }
         };
 
-        var viewModel = new MainWindowViewModel(storage, appSettingsService);
+        var viewModel = CreateViewModel(storage, appSettingsService);
 
         Assert.Equal(TodoFilter.Completed, viewModel.SelectedFilter);
     }
@@ -593,7 +514,7 @@ public class MainWindowViewModelTests
             }
         };
 
-        var viewModel = new MainWindowViewModel(storage, appSettingsService);
+        var viewModel = CreateViewModel(storage, appSettingsService);
 
         viewModel.SearchText = "wpf";
 
@@ -606,12 +527,11 @@ public class MainWindowViewModelTests
     public void ToAppSettings_ReturnsCurrentSettings()
     {
         var storage = new FakeTodoStorageService();
-        var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService())
-        {
-            RememberSearchText = true,
-            SearchText = "wpf",
-            SelectedFilter = TodoFilter.Active
-        };
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.RememberSearchText = true;
+        viewModel.SearchText = "wpf";
+        viewModel.SelectedFilter = TodoFilter.Active;
 
         AppSettings appSettings = viewModel.ToAppSettings();
 
@@ -625,7 +545,7 @@ public class MainWindowViewModelTests
     {
         var storage = new FakeTodoStorageService();
         var appSettingsService = new FakeAppSettingsService();
-        var viewModel = new MainWindowViewModel(storage, appSettingsService);
+        var viewModel = CreateViewModel(storage, appSettingsService);
 
         viewModel.ApplyAppSettings(new AppSettings
         {
