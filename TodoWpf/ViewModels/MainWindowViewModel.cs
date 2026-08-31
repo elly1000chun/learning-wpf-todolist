@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -24,6 +24,9 @@ public partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private TodoFilter selectedFilter = TodoFilter.All;
+
+    [ObservableProperty]
+    private TodoDueDateFilter selectedDueDateFilter = TodoDueDateFilter.All;
 
     [ObservableProperty]
     private TodoSortOption selectedSort = TodoSortOption.NewestFirst;
@@ -203,6 +206,11 @@ public partial class MainWindowViewModel : ObservableObject
         TodosView.Refresh();
     }
 
+    partial void OnSelectedDueDateFilterChanged(TodoDueDateFilter value)
+    {
+        TodosView.Refresh();
+    }
+
     partial void OnSelectedSortChanged(TodoSortOption value)
     {
         ApplySort();
@@ -232,10 +240,43 @@ public partial class MainWindowViewModel : ObservableObject
         if (!matchesFilter)
             return false;
 
+        if (!MatchesDueDateFilter(todo, SelectedDueDateFilter))
+            return false;
+
         if (string.IsNullOrWhiteSpace(SearchText))
             return true;
 
         return todo.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool MatchesDueDateFilter(TodoItem todo, TodoDueDateFilter dueDateFilter)
+    {
+        if (dueDateFilter == TodoDueDateFilter.All)
+            return true;
+
+        if (todo.DueDate is null)
+            return dueDateFilter == TodoDueDateFilter.NoDueDate;
+
+        var dueDate = todo.DueDate.Value.Date;
+        var today = DateTime.Today;
+
+        return dueDateFilter switch
+        {
+            TodoDueDateFilter.Today => dueDate == today,
+            TodoDueDateFilter.ThisWeek => IsDateInThisWeek(dueDate, today),
+            TodoDueDateFilter.Overdue => dueDate < today,
+            TodoDueDateFilter.NoDueDate => false,
+            _ => true
+        };
+    }
+
+    private static bool IsDateInThisWeek(DateTime date, DateTime today)
+    {
+        var daysFromMonday = ((int)today.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+        var startOfWeek = today.AddDays(-daysFromMonday);
+        var startOfNextWeek = startOfWeek.AddDays(7);
+
+        return date >= startOfWeek && date < startOfNextWeek;
     }
 
     private void ApplySort()

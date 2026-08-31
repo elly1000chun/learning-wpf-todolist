@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System;
 using TodoWpf.Models;
@@ -496,6 +496,137 @@ public class MainWindowViewModelTests
         Assert.Single(visibleTodos);
         Assert.Equal("진행 중 할 일", visibleTodos[0].Title);
         Assert.Equal(2, viewModel.Todos.Count);
+    }
+
+    [Fact]
+    public void SelectedDueDateFilter_Today_ShowsOnlyTodosDueToday()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var todayTodo = CreateTodo("오늘 마감");
+        todayTodo.DueDate = DateTime.Today;
+
+        var tomorrowTodo = CreateTodo("내일 마감");
+        tomorrowTodo.DueDate = DateTime.Today.AddDays(1);
+
+        storage.TodosToLoad.Add(todayTodo);
+        storage.TodosToLoad.Add(tomorrowTodo);
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.SelectedDueDateFilter = TodoDueDateFilter.Today;
+
+        var visibleTodos = viewModel.TodosView.Cast<TodoItem>().ToList();
+
+        Assert.Single(visibleTodos);
+        Assert.Equal("오늘 마감", visibleTodos[0].Title);
+    }
+
+    [Fact]
+    public void SelectedDueDateFilter_ThisWeek_ShowsOnlyTodosDueThisWeek()
+    {
+        var storage = new FakeTodoStorageService();
+        var daysFromMonday = ((int)DateTime.Today.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+        var startOfWeek = DateTime.Today.AddDays(-daysFromMonday);
+
+        var thisWeekTodo = CreateTodo("이번 주 마감");
+        thisWeekTodo.DueDate = startOfWeek.AddDays(1);
+
+        var nextWeekTodo = CreateTodo("다음 주 마감");
+        nextWeekTodo.DueDate = startOfWeek.AddDays(7);
+
+        storage.TodosToLoad.Add(thisWeekTodo);
+        storage.TodosToLoad.Add(nextWeekTodo);
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.SelectedDueDateFilter = TodoDueDateFilter.ThisWeek;
+
+        var visibleTodos = viewModel.TodosView.Cast<TodoItem>().ToList();
+
+        Assert.Single(visibleTodos);
+        Assert.Equal("이번 주 마감", visibleTodos[0].Title);
+    }
+
+    [Fact]
+    public void SelectedDueDateFilter_Overdue_ShowsOnlyOverdueTodos()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var overdueTodo = CreateTodo("기한 지난 할 일");
+        overdueTodo.DueDate = DateTime.Today.AddDays(-1);
+
+        var todayTodo = CreateTodo("오늘 마감");
+        todayTodo.DueDate = DateTime.Today;
+
+        storage.TodosToLoad.Add(overdueTodo);
+        storage.TodosToLoad.Add(todayTodo);
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.SelectedDueDateFilter = TodoDueDateFilter.Overdue;
+
+        var visibleTodos = viewModel.TodosView.Cast<TodoItem>().ToList();
+
+        Assert.Single(visibleTodos);
+        Assert.Equal("기한 지난 할 일", visibleTodos[0].Title);
+    }
+
+    [Fact]
+    public void SelectedDueDateFilter_NoDueDate_ShowsOnlyTodosWithoutDueDate()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var noDueDateTodo = CreateTodo("마감일 없음");
+
+        var dueDateTodo = CreateTodo("마감일 있음");
+        dueDateTodo.DueDate = DateTime.Today;
+
+        storage.TodosToLoad.Add(noDueDateTodo);
+        storage.TodosToLoad.Add(dueDateTodo);
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.SelectedDueDateFilter = TodoDueDateFilter.NoDueDate;
+
+        var visibleTodos = viewModel.TodosView.Cast<TodoItem>().ToList();
+
+        Assert.Single(visibleTodos);
+        Assert.Equal("마감일 없음", visibleTodos[0].Title);
+    }
+
+    [Fact]
+    public void SelectedDueDateFilter_WorksWithStatusFilterAndSearchText()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var matchingTodo = CreateTodo("WPF 오늘 마감", isDone: false);
+        matchingTodo.DueDate = DateTime.Today;
+
+        var completedTodo = CreateTodo("WPF 완료 항목", isDone: true);
+        completedTodo.DueDate = DateTime.Today;
+
+        var otherTitleTodo = CreateTodo("C# 오늘 마감", isDone: false);
+        otherTitleTodo.DueDate = DateTime.Today;
+
+        var tomorrowTodo = CreateTodo("WPF 내일 마감", isDone: false);
+        tomorrowTodo.DueDate = DateTime.Today.AddDays(1);
+
+        storage.TodosToLoad.Add(matchingTodo);
+        storage.TodosToLoad.Add(completedTodo);
+        storage.TodosToLoad.Add(otherTitleTodo);
+        storage.TodosToLoad.Add(tomorrowTodo);
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.SelectedFilter = TodoFilter.Active;
+        viewModel.SelectedDueDateFilter = TodoDueDateFilter.Today;
+        viewModel.SearchText = "wpf";
+
+        var visibleTodos = viewModel.TodosView.Cast<TodoItem>().ToList();
+
+        Assert.Single(visibleTodos);
+        Assert.Equal("WPF 오늘 마감", visibleTodos[0].Title);
     }
 
     [Fact]

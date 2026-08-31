@@ -31,6 +31,7 @@ WPF와 MVVM 패턴을 학습하기 위한 간단한 할 일 관리 앱입니다.
 - 목록에서 작성일, 수정일, 마감일 표시
 - 할 일 목록 JSON 자동 저장 및 앱 시작 시 불러오기
 - 전체 / 진행 중 / 완료 필터
+- 오늘 / 이번 주 / 기한 지남 / 마감일 없음 필터
 - 할 일 제목 검색 및 Esc/버튼으로 검색어 초기화
 - 최신순, 오래된순, 제목순, 미완료순, 마감일순 정렬
 - 설정 창에서 시작 필터, 기본 정렬, 검색어 기억, 테마 옵션 관리
@@ -52,6 +53,7 @@ learning-wpf-todolist/
 │  ├─ Models/
 │  │  ├─ AppSettings.cs
 │  │  ├─ AppTheme.cs
+│  │  ├─ TodoDueDateFilter.cs
 │  │  ├─ TodoFilter.cs
 │  │  ├─ TodoSortOption.cs
 │  │  └─ TodoItems.cs
@@ -91,6 +93,7 @@ learning-wpf-todolist/
 - `ViewModels/SettingsWindowViewModel.cs`: 설정 창에서 편집하는 시작 필터, 기본 정렬, 검색어 기억, 테마 옵션 상태를 관리합니다.
 - `Models/AppSettings.cs`: 검색어 기억, 시작 필터, 기본 정렬, 테마 같은 사용자 설정 값을 정의합니다.
 - `Models/AppTheme.cs`: 밝은 테마, 어두운 테마 값을 정의합니다.
+- `Models/TodoDueDateFilter.cs`: 전체, 오늘, 이번 주, 기한 지남, 마감일 없음 필터 값을 정의합니다.
 - `Models/TodoFilter.cs`: 전체, 진행 중, 완료 필터 값을 정의합니다.
 - `Models/TodoSortOption.cs`: 최신순, 오래된순, 제목순, 미완료순, 마감일순 정렬 옵션을 정의합니다.
 - `Models/TodoItems.cs`: 할 일 제목, 완료 여부, 작성일, 수정일, 마감일 같은 항목 데이터를 정의합니다.
@@ -130,7 +133,7 @@ cd D:\Dev\WPF\learning-wpf-todolist
 dotnet test
 ```
 
-현재 테스트는 `MainWindowViewModel`, `SettingsWindowViewModel`, `TodoStorageService`, `AppSettingsService`를 대상으로 합니다. ViewModel 테스트에서는 실제 JSON 파일을 쓰지 않도록 fake service를 사용하고, Service 테스트에서는 임시 파일 경로를 주입해 저장, 불러오기, 폴더 생성, 깨진 JSON 복구, 들여쓰기 JSON 출력을 검증합니다. 시작 필터, 기본 정렬, 검색어 기억, 테마 설정이 저장되고 다시 적용되는지도 함께 확인합니다.
+현재 테스트는 `MainWindowViewModel`, `SettingsWindowViewModel`, `TodoStorageService`, `AppSettingsService`를 대상으로 합니다. ViewModel 테스트에서는 실제 JSON 파일을 쓰지 않도록 fake service를 사용하고, Service 테스트에서는 임시 파일 경로를 주입해 저장, 불러오기, 폴더 생성, 깨진 JSON 복구, 들여쓰기 JSON 출력을 검증합니다. 시작 필터, 마감일 필터, 기본 정렬, 검색어 기억, 테마 설정이 저장되고 다시 적용되는지도 함께 확인합니다.
 
 ## 사용 기술
 
@@ -147,8 +150,8 @@ dotnet test
 
 ## 다음 학습 과제
 
-- 마감일 필터
 - UI 품질 개선
+- 상태 표시와 사용자 피드백
 
 ## 메모
 
