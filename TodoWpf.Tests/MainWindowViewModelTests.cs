@@ -94,6 +94,73 @@ public class MainWindowViewModelTests
 
         Assert.Equal(originalCount, viewModel.Todos.Count);
         Assert.Equal(0, storage.SaveCallCount);
+        Assert.Equal("제목을 입력하세요.", viewModel.NewTodoTitleErrorMessage);
+    }
+
+    [Fact]
+    public void AddTodoCommand_TrimsTitleBeforeAdding()
+    {
+        var storage = new FakeTodoStorageService();
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.NewTodoTitle = "  WPF 공부  ";
+
+        viewModel.AddTodoCommand.Execute(null);
+
+        Assert.Contains(viewModel.Todos, todo => todo.Title == "WPF 공부");
+        Assert.DoesNotContain(viewModel.Todos, todo => todo.Title == "  WPF 공부  ");
+    }
+
+    [Fact]
+    public void AddTodoCommand_CannotExecute_WhenTitleIsTooLong()
+    {
+        var storage = new FakeTodoStorageService();
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.NewTodoTitle = new string('a', 101);
+
+        Assert.False(viewModel.AddTodoCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void AddTodoCommand_DoesNotAddTodo_WhenTitleIsTooLong()
+    {
+        var storage = new FakeTodoStorageService();
+        var viewModel = CreateViewModel(storage);
+
+        var originalCount = viewModel.Todos.Count;
+
+        viewModel.NewTodoTitle = new string('a', 101);
+
+        Assert.False(viewModel.AddTodoCommand.CanExecute(null));
+
+        viewModel.AddTodoCommand.Execute(null);
+
+        Assert.Equal(originalCount, viewModel.Todos.Count);
+        Assert.Equal(0, storage.SaveCallCount);
+    }
+
+    [Fact]
+    public void NewTodoTitleErrorMessage_ShowsMessage_WhenTitleIsTooLong()
+    {
+        var storage = new FakeTodoStorageService();
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.NewTodoTitle = new string('a', 101);
+
+        Assert.Equal("제목은 100자 이하로 입력하세요.", viewModel.NewTodoTitleErrorMessage);
+    }
+
+    [Fact]
+    public void NewTodoTitleErrorMessage_Clears_WhenTitleIsValid()
+    {
+        var storage = new FakeTodoStorageService();
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.NewTodoTitle = new string('a', 101);
+        viewModel.NewTodoTitle = "WPF 공부";
+
+        Assert.Equal(string.Empty, viewModel.NewTodoTitleErrorMessage);
     }
 
     [Fact]
@@ -276,6 +343,26 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
+    public void SaveEditCommand_TrimsTitleBeforeSaving()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var todo = CreateTodo("수정 전 할 일");
+
+        storage.TodosToLoad.Add(todo);
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.StartEditCommand.Execute(todo);
+        viewModel.EditTodoTitle = "  수정 후 할 일  ";
+
+        viewModel.SaveEditCommand.Execute(null);
+
+        Assert.Equal("수정 후 할 일", todo.Title);
+        Assert.Equal("수정 후 할 일", storage.LastSavedTodos[0].Title);
+    }
+
+    [Fact]
     public void CancelEditCommand_ClearsEditStateWithoutChangingTodo()
     {
         var storage = new FakeTodoStorageService();
@@ -312,6 +399,65 @@ public class MainWindowViewModelTests
         viewModel.EditTodoTitle = "   ";
 
         Assert.False(viewModel.SaveEditCommand.CanExecute(null));
+        Assert.Equal("제목을 입력하세요.", viewModel.EditTodoTitleErrorMessage);
+    }
+
+    [Fact]
+    public void SaveEditCommand_DoesNotSave_WhenEditTitleIsTooLong()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var todo = CreateTodo("수정 전 할 일");
+
+        storage.TodosToLoad.Add(todo);
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.StartEditCommand.Execute(todo);
+        viewModel.EditTodoTitle = new string('a', 101);
+
+        Assert.False(viewModel.SaveEditCommand.CanExecute(null));
+
+        viewModel.SaveEditCommand.Execute(null);
+
+        Assert.Equal("수정 전 할 일", todo.Title);
+        Assert.Same(todo, viewModel.EditingTodo);
+        Assert.Equal(0, storage.SaveCallCount);
+    }
+
+    [Fact]
+    public void EditTodoTitleErrorMessage_ShowsMessage_WhenTitleIsTooLong()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var todo = CreateTodo("수정 전 할 일");
+
+        storage.TodosToLoad.Add(todo);
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.StartEditCommand.Execute(todo);
+        viewModel.EditTodoTitle = new string('a', 101);
+
+        Assert.Equal("제목은 100자 이하로 입력하세요.", viewModel.EditTodoTitleErrorMessage);
+    }
+
+    [Fact]
+    public void EditTodoTitleErrorMessage_Clears_WhenTitleIsValid()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var todo = CreateTodo("수정 전 할 일");
+
+        storage.TodosToLoad.Add(todo);
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.StartEditCommand.Execute(todo);
+        viewModel.EditTodoTitle = new string('a', 101);
+        viewModel.EditTodoTitle = "수정 후 할 일";
+
+        Assert.Equal(string.Empty, viewModel.EditTodoTitleErrorMessage);
     }
 
     [Fact]

@@ -11,6 +11,10 @@ namespace TodoWpf.ViewModels;
 
 public partial class MainWindowViewModel : ObservableObject
 {
+    // Constants---------------------------------
+    private const int MaxTodoTitleLength = 100;
+
+    // Properties ---------------------------------
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(AddTodoCommand))]
     private string newTodoTitle = string.Empty;
@@ -31,15 +35,20 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveEditCommand))]
     private string editTodoTitle = string.Empty;
+    [ObservableProperty]
+    private string newTodoTitleErrorMessage = string.Empty;
+    [ObservableProperty]
+    private string editTodoTitleErrorMessage = string.Empty;
+
 
     private readonly ITodoStorageService storageService;
-
     private readonly IAppSettingsService appSettingsService;
     private readonly AppSettings appSettings;
     private readonly IThemeService themeService;
 
     [ObservableProperty]
     private bool rememberSearchText;
+
 
     public ObservableCollection<TodoItem> Todos { get; } = new();
 
@@ -117,6 +126,61 @@ public partial class MainWindowViewModel : ObservableObject
         storageService.Save(Todos);
     }
 
+    private void SaveAppSettings()
+    {
+        appSettings.RememberSearchText = RememberSearchText;
+        appSettings.SearchText = RememberSearchText ? SearchText : string.Empty;
+        appSettings.DefaultFilter = SelectedFilter;
+        appSettings.Theme = Theme;
+
+        appSettingsService.Save(appSettings);
+    }
+
+    public void ApplyAppSettings(AppSettings newAppSettings)
+    {
+        SearchText = newAppSettings.RememberSearchText
+            ? newAppSettings.SearchText
+            : string.Empty;
+
+        RememberSearchText = newAppSettings.RememberSearchText;
+        SelectedFilter = newAppSettings.DefaultFilter;
+        Theme = newAppSettings.Theme;
+
+        SaveAppSettings();
+    }
+
+    private static string NormalizeTodoTitle(string title)
+    {
+        return title.Trim();
+    }
+
+    private static bool IsValidTodoTitle(string title)
+    {
+        var normalizedTitle = NormalizeTodoTitle(title);
+
+        return normalizedTitle.Length > 0 &&
+               normalizedTitle.Length <= MaxTodoTitleLength;
+    }
+
+    private static string GetTodoTitleErrorMessage(string title)
+    {
+        var normalizedTitle = NormalizeTodoTitle(title);
+
+        if (normalizedTitle.Length == 0)
+        {
+            return "제목을 입력하세요.";
+        }
+
+        if (normalizedTitle.Length > MaxTodoTitleLength)
+        {
+            return $"제목은 {MaxTodoTitleLength}자 이하로 입력하세요.";
+        }
+
+        return string.Empty;
+    }
+
+
+    // Partial methods -------------------------
     partial void OnSelectedFilterChanged(TodoFilter value)
     {
         TodosView.Refresh();
@@ -151,40 +215,25 @@ public partial class MainWindowViewModel : ObservableObject
         return todo.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
     }
 
-    private void SaveAppSettings()
+    partial void OnNewTodoTitleChanged(string value)
     {
-        appSettings.RememberSearchText = RememberSearchText;
-        appSettings.SearchText = RememberSearchText ? SearchText : string.Empty;
-        appSettings.DefaultFilter = SelectedFilter;
-        appSettings.Theme = Theme;
-
-        appSettingsService.Save(appSettings);
+        NewTodoTitleErrorMessage = GetTodoTitleErrorMessage(value);
     }
-
-    public void ApplyAppSettings(AppSettings newAppSettings)
+    partial void OnEditTodoTitleChanged(string value)
     {
-        SearchText = newAppSettings.RememberSearchText
-            ? newAppSettings.SearchText
-            : string.Empty;
-
-        RememberSearchText = newAppSettings.RememberSearchText;
-        SelectedFilter = newAppSettings.DefaultFilter;
-        Theme = newAppSettings.Theme;
-
-        SaveAppSettings();
+        EditTodoTitleErrorMessage = GetTodoTitleErrorMessage(value);
     }
-
 
     // Can methods for commands
     private bool CanAddTodo()
     {
-        return !string.IsNullOrWhiteSpace(NewTodoTitle);
+        return IsValidTodoTitle(NewTodoTitle);
     }
 
     private bool CanSaveEdit()
     {
-        return EditingTodo is not null
-            && !string.IsNullOrWhiteSpace(EditTodoTitle);
+        return EditingTodo is not null &&
+               IsValidTodoTitle(EditTodoTitle);
     }
 
     private bool CanClearCompleted()
@@ -224,15 +273,19 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanAddTodo))]
     private void AddTodo()
     {
-        var title = NewTodoTitle.Trim();
-
-        if (title.Length == 0)
-            return;
-
-        AddTodoItem(new TodoItem
+        var normalizedTitle = NormalizeTodoTitle(NewTodoTitle);
+        if (!IsValidTodoTitle(NewTodoTitle))
         {
-            Title = title
-        });
+            NewTodoTitleErrorMessage = GetTodoTitleErrorMessage(NewTodoTitle);
+            return;
+        }
+
+        var todo = new TodoItem
+        {
+            Title = normalizedTitle
+        };
+
+        AddTodoItem(todo);
 
         NewTodoTitle = string.Empty;
         SaveTodos();
@@ -282,10 +335,13 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanSaveEdit))]
     private void SaveEdit()
     {
-        if (EditingTodo is null)
+        if (EditingTodo is null || !IsValidTodoTitle(EditTodoTitle))
+        {
+            EditTodoTitleErrorMessage = GetTodoTitleErrorMessage(EditTodoTitle);
             return;
+        }
 
-        EditingTodo.Title = EditTodoTitle.Trim();
+        EditingTodo.Title = NormalizeTodoTitle(EditTodoTitle);
 
         EditingTodo = null;
         EditTodoTitle = string.Empty;
