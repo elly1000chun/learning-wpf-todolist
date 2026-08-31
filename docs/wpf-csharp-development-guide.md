@@ -426,6 +426,36 @@ DI 단계에서는 View와 ViewModel이 필요한 객체를 직접 만들지 않
 
 핵심은 “설정을 편집하는 화면 상태”와 “앱에 실제 적용된 설정 상태”를 분리하는 것입니다. 설정 창에서 값을 바꾸는 동안에는 임시 ViewModel만 변경하고, 사용자가 저장을 선택했을 때만 메인 ViewModel과 JSON 저장소에 반영하면 취소 동작이 자연스럽고 안전해집니다.
 
+## 기본 필터 저장 학습 메모
+
+기본 필터 저장 단계에서는 설정 화면에 앱 시작 시 사용할 필터 옵션을 추가하고, 저장된 설정을 다음 실행 때 초기 필터로 적용하는 흐름을 배웠습니다.
+
+이번 구현에서 배운 흐름은 다음과 같습니다.
+
+1. `AppSettings`에 `DefaultFilter` 속성을 추가해 시작 필터 설정을 저장한다.
+2. `DefaultFilter`의 기본값은 `TodoFilter.All`로 두어 기존 동작을 유지한다.
+3. 앱 시작 시 `appSettingsService.Load()`로 설정을 읽은 뒤 `selectedFilter = appSettings.DefaultFilter`로 초기 필터를 반영한다.
+4. 생성자에서는 `SelectedFilter = ...` 대신 필드인 `selectedFilter = ...`를 사용해 초기화 중 불필요한 변경 반응을 피한다.
+5. `MainWindowViewModel.ToAppSettings()`에 `DefaultFilter = SelectedFilter`를 포함해 현재 필터 상태를 설정 창으로 전달한다.
+6. `ApplyAppSettings()`에서 설정 창이 돌려준 `DefaultFilter`를 `SelectedFilter`에 반영한다.
+7. `SaveAppSettings()`에도 `appSettings.DefaultFilter = SelectedFilter`를 추가해 실제 JSON 저장값에 포함한다.
+8. `SettingsWindowViewModel`에 `DefaultFilter` 속성을 추가해 설정 창에서 선택한 필터를 임시 상태로 관리한다.
+9. 설정 창의 `ComboBoxItem.Tag`에 `TodoFilter.All`, `TodoFilter.Active`, `TodoFilter.Completed` enum 값을 넣는다.
+10. `ComboBox.SelectedValue`를 `DefaultFilter`에 바인딩하고 `SelectedValuePath="Tag"`로 실제 선택값을 enum으로 전달한다.
+11. 설정 항목이 늘어나면서 창 높이를 조정해 검색어 입력창이 가려지지 않게 한다.
+12. 기본 `System.Text.Json`은 enum을 문자열이 아니라 숫자로 저장한다는 점을 확인한다.
+13. `MainWindowViewModelTests`와 `SettingsWindowViewModelTests`에 기본 필터 복사, 적용, 저장 테스트를 보강한다.
+
+이번 단계에서 확인한 주요 동작은 다음과 같습니다.
+
+- 설정 창에서 `시작 필터`를 선택할 수 있다.
+- `완료`를 기본 필터로 저장하면 앱을 다시 실행했을 때 완료 필터가 선택된 상태로 시작된다.
+- `DefaultFilter`는 설정 JSON에 숫자 값으로 저장될 수 있다.
+- `ToAppSettings()`, `ApplyAppSettings()`, `SaveAppSettings()`에 모두 새 설정값을 포함해야 누락 없이 흐름이 이어진다.
+- 설정 창 ViewModel은 필터 선택값도 `AppSettings`에서 복사하고 다시 `AppSettings`로 돌려준다.
+
+핵심은 새 설정 항목을 추가할 때 “모델, 메인 ViewModel, 설정 창 ViewModel, XAML, 테스트”를 한 줄로 이어서 생각하는 것입니다. 설정 모델에 속성만 추가하면 끝나는 것이 아니라, 값을 읽고 보여주고 수정하고 저장하고 검증하는 모든 지점에 같은 설정이 통과해야 합니다.
+
 ## 실행과 빌드
 
 앱 프로젝트 폴더에서 다음 명령을 사용할 수 있습니다.
@@ -465,11 +495,12 @@ Visual Studio에서는 `TodoWpf.slnx` 또는 `TodoWpf.csproj`를 열고 `F5`로 
 15. 게시, 설치 파일, MSIX 배포
 16. 설정 화면 또는 사용자 옵션 저장
 17. 설정 화면 분리
+18. 기본 필터 저장
 
 ## 다음 실습 후보
 
-1. 기본 필터 저장: 앱 시작 시 선택할 필터 기억
-2. 테스트 정리: ViewModel 생성 helper와 테스트 중복 줄이기
-3. 설정 화면 확장: 기본 필터, 테마 같은 옵션 추가
+1. 테스트 정리: ViewModel 생성 helper와 테스트 중복 줄이기
+2. 설정 화면 확장: 테마 같은 옵션 추가
+3. 구조 정리: `TodoFilter` enum 위치 재검토
 
 기능을 추가할 때는 한 번에 많은 구조를 바꾸기보다, ViewModel 속성 하나, Command 하나, XAML 바인딩 하나처럼 작은 단위로 이해하면서 확장하는 것을 권장합니다.

@@ -12,12 +12,16 @@ public partial class SettingsWindowViewModel : ObservableObject
     [ObservableProperty]
     private string searchText = string.Empty;
 
+    [ObservableProperty]
+    private TodoFilter defaultFilter;
+
     public bool IsSaved { get; private set; }
 
     public SettingsWindowViewModel(AppSettings appSettings)
     {
         rememberSearchText = appSettings.RememberSearchText;
         searchText = appSettings.SearchText;
+        defaultFilter = appSettings.DefaultFilter;
     }
 
     public AppSettings ToAppSettings()
@@ -25,7 +29,8 @@ public partial class SettingsWindowViewModel : ObservableObject
         return new AppSettings
         {
             RememberSearchText = RememberSearchText,
-            SearchText = RememberSearchText ? SearchText : string.Empty
+            SearchText = RememberSearchText ? SearchText : string.Empty,
+            DefaultFilter = DefaultFilter
         };
     }
 

@@ -565,6 +565,23 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
+    public void Constructor_LoadsDefaultFilter()
+    {
+        var storage = new FakeTodoStorageService();
+        var appSettingsService = new FakeAppSettingsService
+        {
+            Settings = new AppSettings
+            {
+                DefaultFilter = TodoFilter.Completed
+            }
+        };
+
+        var viewModel = new MainWindowViewModel(storage, appSettingsService);
+
+        Assert.Equal(TodoFilter.Completed, viewModel.SelectedFilter);
+    }
+
+    [Fact]
     public void SearchText_SavesSettings_WhenRememberSearchTextIsTrue()
     {
         var storage = new FakeTodoStorageService();
@@ -592,13 +609,15 @@ public class MainWindowViewModelTests
         var viewModel = new MainWindowViewModel(storage, new FakeAppSettingsService())
         {
             RememberSearchText = true,
-            SearchText = "wpf"
+            SearchText = "wpf",
+            SelectedFilter = TodoFilter.Active
         };
 
         AppSettings appSettings = viewModel.ToAppSettings();
 
         Assert.True(appSettings.RememberSearchText);
         Assert.Equal("wpf", appSettings.SearchText);
+        Assert.Equal(TodoFilter.Active, appSettings.DefaultFilter);
     }
 
     [Fact]
@@ -611,13 +630,16 @@ public class MainWindowViewModelTests
         viewModel.ApplyAppSettings(new AppSettings
         {
             RememberSearchText = true,
-            SearchText = "wpf"
+            SearchText = "wpf",
+            DefaultFilter = TodoFilter.Completed
         });
 
         Assert.True(viewModel.RememberSearchText);
         Assert.Equal("wpf", viewModel.SearchText);
+        Assert.Equal(TodoFilter.Completed, viewModel.SelectedFilter);
         Assert.True(appSettingsService.SaveCallCount >= 1);
         Assert.True(appSettingsService.Settings.RememberSearchText);
         Assert.Equal("wpf", appSettingsService.Settings.SearchText);
+        Assert.Equal(TodoFilter.Completed, appSettingsService.Settings.DefaultFilter);
     }
 }

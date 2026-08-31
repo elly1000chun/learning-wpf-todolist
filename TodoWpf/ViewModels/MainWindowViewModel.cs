@@ -75,6 +75,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         rememberSearchText = appSettings.RememberSearchText;
         searchText = rememberSearchText ? appSettings.SearchText : string.Empty;
+        selectedFilter = appSettings.DefaultFilter;
     }
     // _Constructors
 
@@ -83,7 +84,8 @@ public partial class MainWindowViewModel : ObservableObject
         return new AppSettings
         {
             RememberSearchText = RememberSearchText,
-            SearchText = SearchText
+            SearchText = SearchText,
+            DefaultFilter = SelectedFilter
         };
     }
 
@@ -137,6 +139,7 @@ public partial class MainWindowViewModel : ObservableObject
     {
         appSettings.RememberSearchText = RememberSearchText;
         appSettings.SearchText = RememberSearchText ? SearchText : string.Empty;
+        appSettings.DefaultFilter = SelectedFilter;
 
         appSettingsService.Save(appSettings);
     }
@@ -148,6 +151,7 @@ public partial class MainWindowViewModel : ObservableObject
             : string.Empty;
 
         RememberSearchText = newAppSettings.RememberSearchText;
+        SelectedFilter = newAppSettings.DefaultFilter;
 
         SaveAppSettings();
     }

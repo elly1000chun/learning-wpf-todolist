@@ -11,11 +11,13 @@ public class SettingsWindowViewModelTests
         var viewModel = new SettingsWindowViewModel(new AppSettings
         {
             RememberSearchText = true,
-            SearchText = "wpf"
+            SearchText = "wpf",
+            DefaultFilter = TodoFilter.Completed
         });
 
         Assert.True(viewModel.RememberSearchText);
         Assert.Equal("wpf", viewModel.SearchText);
+        Assert.Equal(TodoFilter.Completed, viewModel.DefaultFilter);
     }
 
     [Fact]
@@ -24,13 +26,15 @@ public class SettingsWindowViewModelTests
         var viewModel = new SettingsWindowViewModel(new AppSettings())
         {
             RememberSearchText = true,
-            SearchText = "wpf"
+            SearchText = "wpf",
+            DefaultFilter = TodoFilter.Active
         };
 
         AppSettings appSettings = viewModel.ToAppSettings();
 
         Assert.True(appSettings.RememberSearchText);
         Assert.Equal("wpf", appSettings.SearchText);
+        Assert.Equal(TodoFilter.Active, appSettings.DefaultFilter);
     }
 
     [Fact]
