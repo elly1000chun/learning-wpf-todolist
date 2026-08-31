@@ -22,6 +22,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <TextBox x:Name="NewTodoTitleTextBox"
@@ -75,6 +76,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <TextBox x:Name="SearchTextBox"
@@ -91,6 +93,12 @@
                     Style="{StaticResource SmallButtonStyle}"
                     Content="X"
                     Command="{Binding ClearSearchCommand}"/>
+
+            <CheckBox Grid.Column="2"
+                      Content="검색어 기억"
+                      IsChecked="{Binding RememberSearchText}"
+                      Margin="12,0,0,0"
+                      VerticalAlignment="Center"/>
         </Grid>
 
         <Grid Grid.Row="3"

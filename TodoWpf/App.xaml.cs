@@ -16,6 +16,7 @@ public partial class App : Application
         services.AddSingleton<ITodoStorageService, TodoStorageService>();
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<MainWindow>();
+        services.AddSingleton<IAppSettingsService, AppSettingsService>();
 
         serviceProvider = services.BuildServiceProvider();
     }

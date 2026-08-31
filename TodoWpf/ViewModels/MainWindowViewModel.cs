@@ -29,19 +29,27 @@ public partial class MainWindowViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(SaveEditCommand))]
     private string editTodoTitle = string.Empty;
 
-
     private readonly ITodoStorageService storageService;
+
+    private readonly IAppSettingsService appSettingsService;
+    private readonly AppSettings appSettings;
+
+    [ObservableProperty]
+    private bool rememberSearchText;
 
     public ObservableCollection<TodoItem> Todos { get; } = new();
 
     public ICollectionView TodosView { get; }
 
     // Constructors ---------------------------------
-    public MainWindowViewModel(ITodoStorageService storageService)
+
+    public MainWindowViewModel(ITodoStorageService storageService,
+        IAppSettingsService appSettingsService)
     {
         this.storageService = storageService;
+        this.appSettingsService = appSettingsService;
 
-        // load file
+        // load saved data
         var savedTodos = storageService.Load();
 
         if (savedTodos.Count == 0)
@@ -61,15 +69,16 @@ public partial class MainWindowViewModel : ObservableObject
 
         TodosView = CollectionViewSource.GetDefaultView(Todos);
         TodosView.Filter = FilterTodo;
+
+        // load settings
+        appSettings = appSettingsService.Load();
+
+        rememberSearchText = appSettings.RememberSearchText;
+        searchText = rememberSearchText ? appSettings.SearchText : string.Empty;
     }
     // _Constructors
 
-    private void OnTodoItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        SaveTodos();
-        TodosView.Refresh();
-        ClearCompletedCommand.NotifyCanExecuteChanged();
-    }
+    // Helper methods -------------------------
 
     private void AddTodoItem(TodoItem item)
     {
@@ -115,6 +124,16 @@ public partial class MainWindowViewModel : ObservableObject
         return todo.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
     }
 
+    private void SaveAppSettings()
+    {
+        appSettings.RememberSearchText = RememberSearchText;
+        appSettings.SearchText = RememberSearchText ? SearchText : string.Empty;
+
+        appSettingsService.Save(appSettings);
+    }
+
+
+    // Can methods for commands
     private bool CanAddTodo()
     {
         return !string.IsNullOrWhiteSpace(NewTodoTitle);
@@ -136,15 +155,30 @@ public partial class MainWindowViewModel : ObservableObject
         return Todos.Count > 0;
     }
 
+    // partial methods 
+    private void OnTodoItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        SaveTodos();
+        TodosView.Refresh();
+        ClearCompletedCommand.NotifyCanExecuteChanged();
+    }
 
     partial void OnSearchTextChanged(string value)
     {
         TodosView.Refresh();
+
+        if (RememberSearchText)
+        {
+            SaveAppSettings();
+        }
     }
 
+    partial void OnRememberSearchTextChanged(bool value)
+    {
+        SaveAppSettings();
+    }
 
-    // Replay commands
-
+    // Replay commands -------------------------
     [RelayCommand(CanExecute = nameof(CanAddTodo))]
     private void AddTodo()
     {
