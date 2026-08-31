@@ -995,6 +995,23 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
+    public void Constructor_LoadsDefaultSortOption()
+    {
+        var storage = new FakeTodoStorageService();
+        var appSettingsService = new FakeAppSettingsService
+        {
+            Settings = new AppSettings
+            {
+                DefaultSortOption = TodoSortOption.TitleAscending
+            }
+        };
+
+        var viewModel = CreateViewModel(storage, appSettingsService);
+
+        Assert.Equal(TodoSortOption.TitleAscending, viewModel.SelectedSort);
+    }
+
+    [Fact]
     public void SearchText_SavesSettings_WhenRememberSearchTextIsTrue()
     {
         var storage = new FakeTodoStorageService();
@@ -1024,12 +1041,14 @@ public class MainWindowViewModelTests
         viewModel.RememberSearchText = true;
         viewModel.SearchText = "wpf";
         viewModel.SelectedFilter = TodoFilter.Active;
+        viewModel.SelectedSort = TodoSortOption.IncompleteFirst;
 
         AppSettings appSettings = viewModel.ToAppSettings();
 
         Assert.True(appSettings.RememberSearchText);
         Assert.Equal("wpf", appSettings.SearchText);
         Assert.Equal(TodoFilter.Active, appSettings.DefaultFilter);
+        Assert.Equal(TodoSortOption.IncompleteFirst, appSettings.DefaultSortOption);
     }
 
     [Fact]
@@ -1043,16 +1062,19 @@ public class MainWindowViewModelTests
         {
             RememberSearchText = true,
             SearchText = "wpf",
-            DefaultFilter = TodoFilter.Completed
+            DefaultFilter = TodoFilter.Completed,
+            DefaultSortOption = TodoSortOption.DueDateAscending
         });
 
         Assert.True(viewModel.RememberSearchText);
         Assert.Equal("wpf", viewModel.SearchText);
         Assert.Equal(TodoFilter.Completed, viewModel.SelectedFilter);
+        Assert.Equal(TodoSortOption.DueDateAscending, viewModel.SelectedSort);
         Assert.True(appSettingsService.SaveCallCount >= 1);
         Assert.True(appSettingsService.Settings.RememberSearchText);
         Assert.Equal("wpf", appSettingsService.Settings.SearchText);
         Assert.Equal(TodoFilter.Completed, appSettingsService.Settings.DefaultFilter);
+        Assert.Equal(TodoSortOption.DueDateAscending, appSettingsService.Settings.DefaultSortOption);
     }
 
     [Fact]

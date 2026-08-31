@@ -18,6 +18,9 @@ public partial class SettingsWindowViewModel : ObservableObject
     [ObservableProperty]
     private AppTheme theme;
 
+    [ObservableProperty]
+    private TodoSortOption defaultSortOption;
+
     public bool IsSaved { get; private set; }
 
     public SettingsWindowViewModel(AppSettings appSettings)
@@ -26,6 +29,7 @@ public partial class SettingsWindowViewModel : ObservableObject
         searchText = appSettings.SearchText;
         defaultFilter = appSettings.DefaultFilter;
         theme = appSettings.Theme;
+        DefaultSortOption = appSettings.DefaultSortOption;
     }
 
     public AppSettings ToAppSettings()
@@ -35,7 +39,8 @@ public partial class SettingsWindowViewModel : ObservableObject
             RememberSearchText = RememberSearchText,
             SearchText = RememberSearchText ? SearchText : string.Empty,
             DefaultFilter = DefaultFilter,
-            Theme = Theme
+            Theme = Theme,
+            DefaultSortOption = DefaultSortOption
         };
     }
 

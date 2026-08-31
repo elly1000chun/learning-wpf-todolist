@@ -18,6 +18,7 @@ public class AppSettingsServiceTests
         Assert.Equal(string.Empty, settings.SearchText);
         Assert.Equal(TodoFilter.All, settings.DefaultFilter);
         Assert.Equal(AppTheme.Light, settings.Theme);
+        Assert.Equal(TodoSortOption.NewestFirst, settings.DefaultSortOption);
     }
 
     [Fact]
@@ -31,7 +32,8 @@ public class AppSettingsServiceTests
             RememberSearchText = true,
             SearchText = "wpf",
             DefaultFilter = TodoFilter.Completed,
-            Theme = AppTheme.Dark
+            Theme = AppTheme.Dark,
+            DefaultSortOption = TodoSortOption.TitleAscending
         });
 
         Assert.True(File.Exists(filePath));
@@ -51,7 +53,8 @@ public class AppSettingsServiceTests
             RememberSearchText = true,
             SearchText = "wpf",
             DefaultFilter = TodoFilter.Active,
-            Theme = AppTheme.Dark
+            Theme = AppTheme.Dark,
+            DefaultSortOption = TodoSortOption.IncompleteFirst
         });
 
         Assert.True(File.Exists(filePath));
@@ -68,7 +71,8 @@ public class AppSettingsServiceTests
             RememberSearchText = true,
             SearchText = "wpf",
             DefaultFilter = TodoFilter.Active,
-            Theme = AppTheme.Dark
+            Theme = AppTheme.Dark,
+            DefaultSortOption = TodoSortOption.DueDateAscending
         });
 
         var json = File.ReadAllText(filePath);
@@ -76,6 +80,7 @@ public class AppSettingsServiceTests
         Assert.Contains("\n", json);
         Assert.Contains("  \"RememberSearchText\"", json);
         Assert.Contains("  \"SearchText\"", json);
+        Assert.Contains("  \"DefaultSortOption\"", json);
     }
 
     [Fact]
@@ -89,7 +94,8 @@ public class AppSettingsServiceTests
             RememberSearchText = true,
             SearchText = "wpf",
             DefaultFilter = TodoFilter.Completed,
-            Theme = AppTheme.Dark
+            Theme = AppTheme.Dark,
+            DefaultSortOption = TodoSortOption.DueDateAscending
         });
 
         var settings = service.Load();
@@ -98,6 +104,7 @@ public class AppSettingsServiceTests
         Assert.Equal("wpf", settings.SearchText);
         Assert.Equal(TodoFilter.Completed, settings.DefaultFilter);
         Assert.Equal(AppTheme.Dark, settings.Theme);
+        Assert.Equal(TodoSortOption.DueDateAscending, settings.DefaultSortOption);
     }
 
     [Fact]
@@ -114,5 +121,6 @@ public class AppSettingsServiceTests
         Assert.Equal(string.Empty, settings.SearchText);
         Assert.Equal(TodoFilter.All, settings.DefaultFilter);
         Assert.Equal(AppTheme.Light, settings.Theme);
+        Assert.Equal(TodoSortOption.NewestFirst, settings.DefaultSortOption);
     }
 }

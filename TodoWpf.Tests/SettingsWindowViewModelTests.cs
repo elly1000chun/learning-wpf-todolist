@@ -13,13 +13,15 @@ public class SettingsWindowViewModelTests
             RememberSearchText = true,
             SearchText = "wpf",
             DefaultFilter = TodoFilter.Completed,
-            Theme = AppTheme.Dark
+            Theme = AppTheme.Dark,
+            DefaultSortOption = TodoSortOption.DueDateAscending
         });
 
         Assert.True(viewModel.RememberSearchText);
         Assert.Equal("wpf", viewModel.SearchText);
         Assert.Equal(TodoFilter.Completed, viewModel.DefaultFilter);
         Assert.Equal(AppTheme.Dark, viewModel.Theme);
+        Assert.Equal(TodoSortOption.DueDateAscending, viewModel.DefaultSortOption);
     }
 
     [Fact]
@@ -30,7 +32,8 @@ public class SettingsWindowViewModelTests
             RememberSearchText = true,
             SearchText = "wpf",
             DefaultFilter = TodoFilter.Active,
-            Theme = AppTheme.Dark
+            Theme = AppTheme.Dark,
+            DefaultSortOption = TodoSortOption.IncompleteFirst
         };
 
         AppSettings appSettings = viewModel.ToAppSettings();
@@ -39,6 +42,7 @@ public class SettingsWindowViewModelTests
         Assert.Equal("wpf", appSettings.SearchText);
         Assert.Equal(TodoFilter.Active, appSettings.DefaultFilter);
         Assert.Equal(AppTheme.Dark, appSettings.Theme);
+        Assert.Equal(TodoSortOption.IncompleteFirst, appSettings.DefaultSortOption);
     }
 
     [Fact]

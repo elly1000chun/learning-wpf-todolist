@@ -705,6 +705,32 @@ TodosView.SortDescriptions.Add(
 
 핵심은 “테스트하기 쉬운 서비스”를 만들기 위해 외부 환경에 닿는 값을 생성자로 받을 수 있게 하는 것입니다. 파일 경로를 주입할 수 있으면 운영 환경에서는 기본 경로를 쓰고, 테스트 환경에서는 격리된 임시 경로를 써서 같은 저장 로직을 안정적으로 검증할 수 있습니다.
 
+## 정렬 설정 저장 학습 메모
+
+정렬 설정 저장 단계에서는 메인 화면에서 선택한 정렬 옵션을 사용자 설정에 저장하고, 앱을 다시 열 때 같은 정렬 상태로 복원하는 흐름을 배웠습니다.
+
+이번 구현에서 배운 흐름은 다음과 같습니다.
+
+1. `AppSettings`에 `DefaultSortOption` 속성을 추가해 저장할 정렬 옵션을 표현한다.
+2. 기존 `TodoSortOption` enum의 `NewestFirst`, `OldestFirst`, `TitleAscending`, `IncompleteFirst`, `DueDateAscending` 값을 그대로 사용한다.
+3. `MainWindowViewModel.ToAppSettings()`에서 현재 화면의 `SelectedSort`를 `DefaultSortOption`으로 복사한다.
+4. 앱 시작 시 `AppSettingsService.Load()`로 읽은 `DefaultSortOption`을 `SelectedSort`에 반영한다.
+5. 설정 창 ViewModel에도 `DefaultSortOption`을 추가해 설정 창에서 기본 정렬을 편집할 수 있게 한다.
+6. `SettingsWindow.xaml`에 기본 정렬 `ComboBox`를 추가하고 `ComboBoxItem.Tag`로 enum 값을 바인딩한다.
+7. `OnSelectedSortChanged()`에서 `ApplySort()`와 `SaveAppSettings()`를 호출해 정렬 변경이 즉시 화면과 설정 파일에 반영되게 한다.
+8. ViewModel 테스트와 Service 테스트에 정렬 설정 저장, 복원, JSON 포함 여부 검증을 추가한다.
+
+이번 단계에서 확인한 주요 동작은 다음과 같습니다.
+
+- 설정 창에서 기본 정렬을 선택할 수 있다.
+- 설정 저장 후 메인 화면 정렬이 즉시 바뀐다.
+- 앱을 종료했다가 다시 실행해도 마지막 정렬 옵션이 유지된다.
+- 설정 JSON에 `DefaultSortOption` 값이 저장된다.
+- 설정 파일이 없거나 깨진 경우에는 `NewestFirst`가 기본 정렬로 사용된다.
+- 전체 테스트 통과로 ViewModel 설정 흐름과 Service JSON 저장 흐름이 함께 유지됨을 확인했다.
+
+핵심은 “화면의 현재 상태”와 “저장할 사용자 기본값”을 연결하는 것입니다. `SelectedSort`는 사용자가 지금 보고 있는 화면 정렬이고, `AppSettings.DefaultSortOption`은 다음 실행 때 복원할 저장값입니다. 같은 enum을 공유하되 역할을 구분하면 설정 창, 메인 화면, JSON 저장소가 한 방향으로 자연스럽게 이어집니다.
+
 ## 실행과 빌드
 
 앱 프로젝트 폴더에서 다음 명령을 사용할 수 있습니다.
@@ -753,11 +779,12 @@ Visual Studio에서는 `TodoWpf.slnx` 또는 `TodoWpf.csproj`를 열고 `F5`로 
 24. 정렬 기능: 생성일순, 완료 여부순, 제목순 정렬
 25. 마감일 입력 UI: DatePicker로 마감일 추가, 수정, 정렬
 26. 서비스 테스트 심화: 저장 서비스와 설정 서비스의 실제 파일 입출력 테스트
+27. 정렬 설정 저장: 마지막으로 선택한 정렬 옵션 기억
 
 ## 다음 실습 후보
 
-1. 정렬 설정 저장: 마지막으로 선택한 정렬 옵션 기억
-2. 마감일 필터: 오늘/이번 주/기한 지난 항목 보기
-3. UI 품질 개선: 날짜 입력과 편집 영역 레이아웃 다듬기
+1. 마감일 필터: 오늘/이번 주/기한 지난 항목 보기
+2. UI 품질 개선: 날짜 입력과 편집 영역 레이아웃 다듬기
+3. 상태 표시와 사용자 피드백: 저장됨, 검색 결과 없음, 완료된 항목 수 표시
 
 기능을 추가할 때는 한 번에 많은 구조를 바꾸기보다, ViewModel 속성 하나, Command 하나, XAML 바인딩 하나처럼 작은 단위로 이해하면서 확장하는 것을 권장합니다.

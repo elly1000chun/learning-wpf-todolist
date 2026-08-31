@@ -103,8 +103,10 @@ public partial class MainWindowViewModel : ObservableObject
         rememberSearchText = appSettings.RememberSearchText;
         searchText = rememberSearchText ? appSettings.SearchText : string.Empty;
         selectedFilter = appSettings.DefaultFilter;
+        selectedSort = appSettings.DefaultSortOption;
         theme = appSettings.Theme;
         themeService.ApplyTheme(theme);
+        ApplySort();
     }
     // _Constructors
 
@@ -115,7 +117,8 @@ public partial class MainWindowViewModel : ObservableObject
             RememberSearchText = RememberSearchText,
             SearchText = SearchText,
             DefaultFilter = SelectedFilter,
-            Theme = Theme
+            Theme = Theme,
+            DefaultSortOption = SelectedSort
         };
     }
 
@@ -144,6 +147,7 @@ public partial class MainWindowViewModel : ObservableObject
         appSettings.SearchText = RememberSearchText ? SearchText : string.Empty;
         appSettings.DefaultFilter = SelectedFilter;
         appSettings.Theme = Theme;
+        appSettings.DefaultSortOption = SelectedSort;
 
         appSettingsService.Save(appSettings);
     }
@@ -157,6 +161,7 @@ public partial class MainWindowViewModel : ObservableObject
         RememberSearchText = newAppSettings.RememberSearchText;
         SelectedFilter = newAppSettings.DefaultFilter;
         Theme = newAppSettings.Theme;
+        SelectedSort = newAppSettings.DefaultSortOption;
 
         SaveAppSettings();
     }
@@ -201,6 +206,7 @@ public partial class MainWindowViewModel : ObservableObject
     partial void OnSelectedSortChanged(TodoSortOption value)
     {
         ApplySort();
+        SaveAppSettings();
     }
 
     partial void OnThemeChanged(AppTheme value)

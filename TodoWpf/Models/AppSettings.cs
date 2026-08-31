@@ -9,4 +9,6 @@ public class AppSettings
     public TodoFilter DefaultFilter { get; set; } = TodoFilter.All;
 
     public AppTheme Theme { get; set; } = AppTheme.Light;
+
+    public TodoSortOption DefaultSortOption { get; set; } = TodoSortOption.NewestFirst;
 }
