@@ -33,7 +33,17 @@
                      Style="{StaticResource InputTextBoxStyle}"
                      Text="{Binding NewTodoTitle,
                                     UpdateSourceTrigger=PropertyChanged}"/>
-            <Button Grid.Column="1"
+
+            <DatePicker Grid.Column="1"
+                        Width="140"
+                        Margin="0,0,8,0"
+                        VerticalAlignment="Center"
+                        Background="{DynamicResource InputBackgroundBrush}"
+                        BorderBrush="{DynamicResource InputBorderBrush}"
+                        Foreground="{DynamicResource InputForegroundBrush}"
+                        SelectedDate="{Binding NewTodoDueDate, Mode=TwoWay}"/>
+
+            <Button Grid.Column="2"
                     Style="{StaticResource AddButtonStyle}"
                     Content="추가"
                     IsDefault="True"
@@ -93,6 +103,8 @@
                               Tag="{x:Static models:TodoSortOption.TitleAscending}"/>
                 <ComboBoxItem Content="미완료순"
                               Tag="{x:Static models:TodoSortOption.IncompleteFirst}"/>
+                <ComboBoxItem Content="마감일순"
+                              Tag="{x:Static models:TodoSortOption.DueDateAscending}"/>
             </ComboBox>
 
             <StackPanel Grid.Row="1"
@@ -145,6 +157,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <TextBox x:Name="EditTodoTitleTextBox"
@@ -156,21 +169,31 @@
                      IsVisibleChanged="EditTodoTitleTextBox_IsVisibleChanged"
                      KeyDown="EditTodoTitleTextBox_KeyDown"/>
 
+            <DatePicker Grid.Row="0"
+                        Grid.Column="1"
+                        Width="140"
+                        Margin="0,0,8,0"
+                        VerticalAlignment="Center"
+                        Background="{DynamicResource InputBackgroundBrush}"
+                        BorderBrush="{DynamicResource InputBorderBrush}"
+                        Foreground="{DynamicResource InputForegroundBrush}"
+                        SelectedDate="{Binding EditTodoDueDate, Mode=TwoWay}"/>
+
             <Button Grid.Row="0"
-                    Grid.Column="1"
+                    Grid.Column="2"
                     Margin="0,0,8,0"
                     Style="{StaticResource SmallButtonStyle}"
                     Content="저장"
                     Command="{Binding SaveEditCommand}"/>
 
             <Button Grid.Row="0"
-                    Grid.Column="2"
+                    Grid.Column="3"
                     Style="{StaticResource SmallButtonStyle}"
                     Content="취소"
                     Command="{Binding CancelEditCommand}"/>
             <TextBlock Grid.Row="1"
                        Grid.Column="0"
-                       Grid.ColumnSpan="3"
+                       Grid.ColumnSpan="4"
                        Style="{StaticResource ErrorTextBlockStyle}"
                        Text="{Binding EditTodoTitleErrorMessage}"/>
         </Grid>

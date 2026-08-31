@@ -171,6 +171,45 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
+    public void SelectedSort_DueDateAscending_SortsTodosWithDueDateFirstThenDueDateAscending()
+    {
+        var storage = new FakeTodoStorageService();
+
+        var noDueDateTodo = CreateTodo("마감일 없음");
+        noDueDateTodo.CreatedAt = new DateTime(2026, 1, 3, 9, 0, 0);
+
+        var lateDueDateTodo = CreateTodo("늦은 마감일");
+        lateDueDateTodo.DueDate = new DateTime(2026, 9, 20);
+        lateDueDateTodo.CreatedAt = new DateTime(2026, 1, 1, 9, 0, 0);
+
+        var oldSameDueDateTodo = CreateTodo("같은 마감일 오래된 항목");
+        oldSameDueDateTodo.DueDate = new DateTime(2026, 9, 15);
+        oldSameDueDateTodo.CreatedAt = new DateTime(2026, 1, 1, 9, 0, 0);
+
+        var newSameDueDateTodo = CreateTodo("같은 마감일 최근 항목");
+        newSameDueDateTodo.DueDate = new DateTime(2026, 9, 15);
+        newSameDueDateTodo.CreatedAt = new DateTime(2026, 1, 2, 9, 0, 0);
+
+        storage.TodosToLoad.Add(noDueDateTodo);
+        storage.TodosToLoad.Add(lateDueDateTodo);
+        storage.TodosToLoad.Add(oldSameDueDateTodo);
+        storage.TodosToLoad.Add(newSameDueDateTodo);
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.SelectedSort = TodoSortOption.DueDateAscending;
+
+        var visibleTitles = viewModel.TodosView
+            .Cast<TodoItem>()
+            .Select(todo => todo.Title)
+            .ToList();
+
+        Assert.Equal(
+            new[] { "같은 마감일 최근 항목", "같은 마감일 오래된 항목", "늦은 마감일", "마감일 없음" },
+            visibleTitles);
+    }
+
+    [Fact]
     public void TodoIsDoneChanged_RefreshesIncompleteFirstSort()
     {
         var storage = new FakeTodoStorageService();
@@ -229,6 +268,40 @@ public class MainWindowViewModelTests
         var todo = Assert.Single(viewModel.Todos, todo => todo.Title == "작성일 테스트");
 
         Assert.InRange(todo.CreatedAt, before, after);
+    }
+
+    [Fact]
+    public void AddTodoCommand_SetsDueDate()
+    {
+        var storage = new FakeTodoStorageService();
+        var viewModel = CreateViewModel(storage);
+        var dueDate = new DateTime(2026, 9, 15);
+
+        viewModel.NewTodoTitle = "마감일 테스트";
+        viewModel.NewTodoDueDate = dueDate;
+
+        viewModel.AddTodoCommand.Execute(null);
+
+        var todo = Assert.Single(viewModel.Todos, todo => todo.Title == "마감일 테스트");
+
+        Assert.Equal(dueDate, todo.DueDate);
+        Assert.Contains(storage.LastSavedTodos, todo =>
+            todo.Title == "마감일 테스트" &&
+            todo.DueDate == dueDate);
+    }
+
+    [Fact]
+    public void AddTodoCommand_ClearsNewTodoDueDate()
+    {
+        var storage = new FakeTodoStorageService();
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.NewTodoTitle = "마감일 초기화 테스트";
+        viewModel.NewTodoDueDate = new DateTime(2026, 9, 15);
+
+        viewModel.AddTodoCommand.Execute(null);
+
+        Assert.Null(viewModel.NewTodoDueDate);
     }
 
     [Fact]
@@ -496,6 +569,24 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
+    public void StartEditCommand_SetsEditTodoDueDate()
+    {
+        var storage = new FakeTodoStorageService();
+        var dueDate = new DateTime(2026, 9, 15);
+
+        var todo = CreateTodo("마감일 있는 할 일");
+        todo.DueDate = dueDate;
+
+        storage.TodosToLoad.Add(todo);
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.StartEditCommand.Execute(todo);
+
+        Assert.Equal(dueDate, viewModel.EditTodoDueDate);
+    }
+
+    [Fact]
     public void SaveEditCommand_UpdatesTodoTitleAndClearsEditState()
     {
         var storage = new FakeTodoStorageService();
@@ -545,6 +636,29 @@ public class MainWindowViewModelTests
     }
 
     [Fact]
+    public void SaveEditCommand_UpdatesTodoDueDateAndClearsEditDueDate()
+    {
+        var storage = new FakeTodoStorageService();
+        var dueDate = new DateTime(2026, 9, 15);
+
+        var todo = CreateTodo("수정 전 할 일");
+
+        storage.TodosToLoad.Add(todo);
+
+        var viewModel = CreateViewModel(storage);
+
+        viewModel.StartEditCommand.Execute(todo);
+        viewModel.EditTodoTitle = "수정 후 할 일";
+        viewModel.EditTodoDueDate = dueDate;
+
+        viewModel.SaveEditCommand.Execute(null);
+
+        Assert.Equal(dueDate, todo.DueDate);
+        Assert.Null(viewModel.EditTodoDueDate);
+        Assert.Equal(dueDate, storage.LastSavedTodos[0].DueDate);
+    }
+
+    [Fact]
     public void SaveEditCommand_TrimsTitleBeforeSaving()
     {
         var storage = new FakeTodoStorageService();
@@ -577,12 +691,14 @@ public class MainWindowViewModelTests
 
         viewModel.StartEditCommand.Execute(todo);
         viewModel.EditTodoTitle = "수정하려던 제목";
+        viewModel.EditTodoDueDate = new DateTime(2026, 9, 15);
 
         viewModel.CancelEditCommand.Execute(null);
 
         Assert.Equal("수정 전 할 일", todo.Title);
         Assert.Null(viewModel.EditingTodo);
         Assert.Equal(string.Empty, viewModel.EditTodoTitle);
+        Assert.Null(viewModel.EditTodoDueDate);
         Assert.Equal(0, storage.SaveCallCount);
     }
 
@@ -675,12 +791,14 @@ public class MainWindowViewModelTests
 
         viewModel.StartEditCommand.Execute(todo);
         viewModel.EditTodoTitle = "수정 중인 제목";
+        viewModel.EditTodoDueDate = new DateTime(2026, 9, 15);
 
         viewModel.RemoveTodoCommand.Execute(todo);
 
         Assert.DoesNotContain(todo, viewModel.Todos);
         Assert.Null(viewModel.EditingTodo);
         Assert.Equal(string.Empty, viewModel.EditTodoTitle);
+        Assert.Null(viewModel.EditTodoDueDate);
         Assert.Equal(1, storage.SaveCallCount);
     }
 
@@ -735,12 +853,14 @@ public class MainWindowViewModelTests
 
         viewModel.StartEditCommand.Execute(todo);
         viewModel.EditTodoTitle = "수정 중인 제목";
+        viewModel.EditTodoDueDate = new DateTime(2026, 9, 15);
 
         viewModel.ClearCompletedCommand.Execute(null);
 
         Assert.DoesNotContain(todo, viewModel.Todos);
         Assert.Null(viewModel.EditingTodo);
         Assert.Equal(string.Empty, viewModel.EditTodoTitle);
+        Assert.Null(viewModel.EditTodoDueDate);
         Assert.Equal(1, storage.SaveCallCount);
     }
 
@@ -774,12 +894,14 @@ public class MainWindowViewModelTests
 
         viewModel.StartEditCommand.Execute(todo);
         viewModel.EditTodoTitle = "수정 중인 제목";
+        viewModel.EditTodoDueDate = new DateTime(2026, 9, 15);
 
         viewModel.ClearAllCommand.Execute(null);
 
         Assert.Empty(viewModel.Todos);
         Assert.Null(viewModel.EditingTodo);
         Assert.Equal(string.Empty, viewModel.EditTodoTitle);
+        Assert.Null(viewModel.EditTodoDueDate);
         Assert.Equal(1, storage.SaveCallCount);
     }
 

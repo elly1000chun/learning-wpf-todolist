@@ -20,6 +20,9 @@ public partial class MainWindowViewModel : ObservableObject
     private string newTodoTitle = string.Empty;
 
     [ObservableProperty]
+    private DateTime? newTodoDueDate;
+
+    [ObservableProperty]
     private TodoFilter selectedFilter = TodoFilter.All;
 
     [ObservableProperty]
@@ -38,6 +41,10 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveEditCommand))]
     private string editTodoTitle = string.Empty;
+
+    [ObservableProperty]
+    private DateTime? editTodoDueDate;
+
     [ObservableProperty]
     private string newTodoTitleErrorMessage = string.Empty;
     [ObservableProperty]
@@ -246,6 +253,14 @@ public partial class MainWindowViewModel : ObservableObject
                 TodosView.SortDescriptions.Add(
                     new SortDescription(nameof(TodoItem.CreatedAt), ListSortDirection.Descending));
                 break;
+            case TodoSortOption.DueDateAscending:
+                TodosView.SortDescriptions.Add(
+                    new SortDescription(nameof(TodoItem.HasDueDate), ListSortDirection.Descending));
+                TodosView.SortDescriptions.Add(
+                    new SortDescription(nameof(TodoItem.DueDate), ListSortDirection.Ascending));
+                TodosView.SortDescriptions.Add(
+                    new SortDescription(nameof(TodoItem.CreatedAt), ListSortDirection.Descending));
+                break;
             case TodoSortOption.NewestFirst:
             default:
                 TodosView.SortDescriptions.Add(
@@ -339,12 +354,14 @@ public partial class MainWindowViewModel : ObservableObject
         var todo = new TodoItem
         {
             Title = normalizedTitle,
-            CreatedAt = DateTime.Now
+            CreatedAt = DateTime.Now,
+            DueDate = NewTodoDueDate
         };
 
         AddTodoItem(todo);
 
         NewTodoTitle = string.Empty;
+        NewTodoDueDate = null;
         SaveTodos();
         ClearAllCommand.NotifyCanExecuteChanged();
     }
@@ -359,6 +376,7 @@ public partial class MainWindowViewModel : ObservableObject
         {
             EditingTodo = null;
             EditTodoTitle = string.Empty;
+            EditTodoDueDate = null;
         }
 
         RemoveTodoItem(item);
@@ -387,6 +405,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         EditingTodo = item;
         EditTodoTitle = item.Title;
+        EditTodoDueDate = item.DueDate;
     }
 
     [RelayCommand(CanExecute = nameof(CanSaveEdit))]
@@ -403,6 +422,7 @@ public partial class MainWindowViewModel : ObservableObject
         try
         {
             EditingTodo.Title = NormalizeTodoTitle(EditTodoTitle);
+            EditingTodo.DueDate = EditTodoDueDate;
             EditingTodo.UpdatedAt = DateTime.Now;
         }
         finally
@@ -415,6 +435,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         EditingTodo = null;
         EditTodoTitle = string.Empty;
+        EditTodoDueDate = null;
     }
 
     [RelayCommand]
@@ -422,6 +443,7 @@ public partial class MainWindowViewModel : ObservableObject
     {
         EditingTodo = null;
         EditTodoTitle = string.Empty;
+        EditTodoDueDate = null;
     }
 
     [RelayCommand(CanExecute = nameof(CanClearCompleted))]
@@ -437,6 +459,7 @@ public partial class MainWindowViewModel : ObservableObject
             {
                 EditingTodo = null;
                 EditTodoTitle = string.Empty;
+                EditTodoDueDate = null;
             }
 
             RemoveTodoItem(todo);
@@ -457,6 +480,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         EditingTodo = null;
         EditTodoTitle = string.Empty;
+        EditTodoDueDate = null;
 
         SaveTodos();
         ClearCompletedCommand.NotifyCanExecuteChanged();

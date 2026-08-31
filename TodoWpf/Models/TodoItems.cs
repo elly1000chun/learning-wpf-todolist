@@ -17,7 +17,11 @@ namespace TodoWpf.Models
         private DateTime? updatedAt;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasDueDate))]
         private DateTime? dueDate;
+
+        public bool HasDueDate => DueDate is not null;
+
     }
 }
 

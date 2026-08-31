@@ -5,5 +5,6 @@ public enum TodoSortOption
     NewestFirst,
     OldestFirst,
     TitleAscending,
-    IncompleteFirst
+    IncompleteFirst,
+    DueDateAscending
 }
