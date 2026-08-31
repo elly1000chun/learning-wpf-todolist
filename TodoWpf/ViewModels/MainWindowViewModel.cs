@@ -277,90 +277,20 @@ public partial class MainWindowViewModel : ObservableObject
         if (item is not TodoItem todo)
             return false;
 
-        var matchesFilter = SelectedFilter switch
-        {
-            TodoFilter.All => true,
-            TodoFilter.Active => !todo.IsDone,
-            TodoFilter.Completed => todo.IsDone,
-            _ => true
-        };
-
-        if (!matchesFilter)
-            return false;
-
-        if (!MatchesDueDateFilter(todo, SelectedDueDateFilter))
-            return false;
-
-        if (string.IsNullOrWhiteSpace(SearchText))
-            return true;
-
-        return todo.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static bool MatchesDueDateFilter(TodoItem todo, TodoDueDateFilter dueDateFilter)
-    {
-        if (dueDateFilter == TodoDueDateFilter.All)
-            return true;
-
-        if (todo.DueDate is null)
-            return dueDateFilter == TodoDueDateFilter.NoDueDate;
-
-        var dueDate = todo.DueDate.Value.Date;
-        var today = DateTime.Today;
-
-        return dueDateFilter switch
-        {
-            TodoDueDateFilter.Today => dueDate == today,
-            TodoDueDateFilter.ThisWeek => IsDateInThisWeek(dueDate, today),
-            TodoDueDateFilter.Overdue => dueDate < today,
-            TodoDueDateFilter.NoDueDate => false,
-            _ => true
-        };
-    }
-
-    private static bool IsDateInThisWeek(DateTime date, DateTime today)
-    {
-        var daysFromMonday = ((int)today.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
-        var startOfWeek = today.AddDays(-daysFromMonday);
-        var startOfNextWeek = startOfWeek.AddDays(7);
-
-        return date >= startOfWeek && date < startOfNextWeek;
+        return TodoFilterService.Matches(
+            todo,
+            SelectedFilter,
+            SelectedDueDateFilter,
+            SearchText);
     }
 
     private void ApplySort()
     {
         TodosView.SortDescriptions.Clear();
 
-        switch (SelectedSort)
+        foreach (var sortDescription in TodoSortService.GetSortDescriptions(SelectedSort))
         {
-            case TodoSortOption.OldestFirst:
-                TodosView.SortDescriptions.Add(
-                    new SortDescription(nameof(TodoItem.CreatedAt), ListSortDirection.Ascending));
-                break;
-
-            case TodoSortOption.TitleAscending:
-                TodosView.SortDescriptions.Add(
-                    new SortDescription(nameof(TodoItem.Title), ListSortDirection.Ascending));
-                break;
-            case TodoSortOption.IncompleteFirst:
-                TodosView.SortDescriptions.Add(
-                    new SortDescription(nameof(TodoItem.IsDone), ListSortDirection.Ascending));
-                TodosView.SortDescriptions.Add(
-                    new SortDescription(nameof(TodoItem.CreatedAt), ListSortDirection.Descending));
-                break;
-            case TodoSortOption.DueDateAscending:
-                TodosView.SortDescriptions.Add(
-                    new SortDescription(nameof(TodoItem.HasDueDate), ListSortDirection.Descending));
-                TodosView.SortDescriptions.Add(
-                    new SortDescription(nameof(TodoItem.DueDate), ListSortDirection.Ascending));
-                TodosView.SortDescriptions.Add(
-                    new SortDescription(nameof(TodoItem.CreatedAt), ListSortDirection.Descending));
-                break;
-            case TodoSortOption.NewestFirst:
-            default:
-                TodosView.SortDescriptions.Add(
-                    new SortDescription(nameof(TodoItem.CreatedAt), ListSortDirection.Descending));
-                break;
+            TodosView.SortDescriptions.Add(sortDescription);
         }
     }
 
