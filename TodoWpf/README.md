@@ -39,6 +39,7 @@ WPF와 MVVM 패턴을 학습하기 위한 간단한 할 일 관리 앱입니다.
 - 밝은 테마 / 어두운 테마 적용 및 저장
 - ViewModel 및 Service 단위 테스트
 - 스타일과 리소스 딕셔너리 분리
+- TextBox, ComboBox, DatePicker, 안내 문구 공통 스타일 관리
 - DI 컨테이너를 통한 ViewModel과 Service 생성
 
 ## 프로젝트 구조
@@ -100,7 +101,7 @@ learning-wpf-todolist/
 - `Services/AppSettingsService.cs`: 사용자 설정을 JSON 파일로 저장하고 불러옵니다.
 - `Services/ThemeService.cs`: 설정된 테마에 맞게 앱 리소스 딕셔너리를 교체합니다.
 - `Services/TodoStorageService.cs`: 할 일 목록을 JSON 파일로 저장하고 불러옵니다.
-- `Styles/TodoStyles.xaml`: 화면에서 재사용하는 스타일과 할 일 항목 템플릿을 정의합니다.
+- `Styles/TodoStyles.xaml`: 화면에서 재사용하는 입력 컨트롤, 버튼, 안내 문구 스타일과 할 일 항목 템플릿을 정의합니다.
 - `Styles/Themes/LightTheme.xaml`: 밝은 테마 색상 리소스를 정의합니다.
 - `Styles/Themes/DarkTheme.xaml`: 어두운 테마 색상 리소스를 정의합니다.
 - `TodoWpf.Tests/MainWindowViewModelTests.cs`: 메인 ViewModel의 추가, 삭제, 저장, 필터, 검색, 정렬, 편집, 입력 검증 동작을 검증합니다.
@@ -150,8 +151,8 @@ dotnet test
 
 ## 다음 학습 과제
 
-- UI 품질 개선
 - 상태 표시와 사용자 피드백
+- MVVM 구조 분리
 
 ## 메모
 

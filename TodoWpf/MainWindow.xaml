@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:models="clr-namespace:TodoWpf.Models"
         Title="WPF 할 일 관리"
-        Width="560"
-        Height="660"
+        Width="640"
+        Height="720"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource WindowBackgroundBrush}"
         Loaded="Window_Loaded">
@@ -37,10 +37,7 @@
             <DatePicker Grid.Column="1"
                         Width="140"
                         Margin="0,0,8,0"
-                        VerticalAlignment="Center"
-                        Background="{DynamicResource InputBackgroundBrush}"
-                        BorderBrush="{DynamicResource InputBorderBrush}"
-                        Foreground="{DynamicResource InputForegroundBrush}"
+                        Style="{StaticResource InputDatePickerStyle}"
                         SelectedDate="{Binding NewTodoDueDate, Mode=TwoWay}"/>
 
             <Button Grid.Column="2"
@@ -60,7 +57,6 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -69,7 +65,12 @@
 
             <StackPanel Grid.Row="0"
                         Grid.Column="0"
-                        Orientation="Horizontal">
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center">
+                <TextBlock Text="상태"
+                           VerticalAlignment="Center"
+                           Margin="0,0,8,0"/>
+
                 <Button Content="전체"
                         Margin="0,0,8,0"
                         Style="{StaticResource AllFilterButtonStyle}"
@@ -88,39 +89,42 @@
                         CommandParameter="{x:Static models:TodoFilter.Completed}"/>
             </StackPanel>
 
-            <ComboBox Grid.Row="0"
-                      Grid.Column="1"
-                      Width="120"
-                      Background="{DynamicResource InputBackgroundBrush}"
-                      BorderBrush="{DynamicResource InputBorderBrush}"
-                      Foreground="{DynamicResource InputForegroundBrush}"
-                      SelectedValue="{Binding SelectedSort, Mode=TwoWay}"
-                      SelectedValuePath="Tag">
-                <ComboBoxItem Content="최신순"
-                              Tag="{x:Static models:TodoSortOption.NewestFirst}"/>
-                <ComboBoxItem Content="오래된순"
-                              Tag="{x:Static models:TodoSortOption.OldestFirst}"/>
-                <ComboBoxItem Content="제목순"
-                              Tag="{x:Static models:TodoSortOption.TitleAscending}"/>
-                <ComboBoxItem Content="미완료순"
-                              Tag="{x:Static models:TodoSortOption.IncompleteFirst}"/>
-                <ComboBoxItem Content="마감일순"
-                              Tag="{x:Static models:TodoSortOption.DueDateAscending}"/>
-            </ComboBox>
+            <StackPanel Grid.Row="0"
+                        Grid.Column="1"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center">
+                <TextBlock Text="정렬"
+                           VerticalAlignment="Center"
+                           Margin="0,0,8,0"/>
+
+                <ComboBox Width="130"
+                          Style="{StaticResource InputComboBoxStyle}"
+                          SelectedValue="{Binding SelectedSort, Mode=TwoWay}"
+                          SelectedValuePath="Tag">
+                    <ComboBoxItem Content="최신순"
+                                  Tag="{x:Static models:TodoSortOption.NewestFirst}"/>
+                    <ComboBoxItem Content="오래된순"
+                                  Tag="{x:Static models:TodoSortOption.OldestFirst}"/>
+                    <ComboBoxItem Content="제목순"
+                                  Tag="{x:Static models:TodoSortOption.TitleAscending}"/>
+                    <ComboBoxItem Content="미완료순"
+                                  Tag="{x:Static models:TodoSortOption.IncompleteFirst}"/>
+                    <ComboBoxItem Content="마감일순"
+                                  Tag="{x:Static models:TodoSortOption.DueDateAscending}"/>
+                </ComboBox>
+            </StackPanel>
 
             <StackPanel Grid.Row="1"
                         Grid.Column="0"
-                        Grid.ColumnSpan="2"
                         Orientation="Horizontal"
-                        Margin="0,8,0,0">
+                        VerticalAlignment="Center"
+                        Margin="0,10,0,0">
                 <TextBlock Text="마감일"
                            VerticalAlignment="Center"
                            Margin="0,0,8,0"/>
 
                 <ComboBox Width="140"
-                          Background="{DynamicResource InputBackgroundBrush}"
-                          BorderBrush="{DynamicResource InputBorderBrush}"
-                          Foreground="{DynamicResource InputForegroundBrush}"
+                          Style="{StaticResource InputComboBoxStyle}"
                           SelectedValue="{Binding SelectedDueDateFilter, Mode=TwoWay}"
                           SelectedValuePath="Tag">
                     <ComboBoxItem Content="전체"
@@ -136,11 +140,12 @@
                 </ComboBox>
             </StackPanel>
 
-            <StackPanel Grid.Row="2"
-                        Grid.Column="0"
-                        Grid.ColumnSpan="2"
+            <StackPanel Grid.Row="1"
+                        Grid.Column="1"
                         Orientation="Horizontal"
-                        Margin="0,8,0,0">
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Margin="0,10,0,0">
                 <Button Content="완료 항목 삭제"
                         Margin="0,0,8,0"
                         Style="{StaticResource SmallButtonStyle}"
@@ -153,7 +158,7 @@
         </Grid>
 
         <Grid Grid.Row="3"
-              Margin="0,12,0,0">
+              Margin="0,16,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -176,7 +181,7 @@
         </Grid>
 
         <Grid Grid.Row="4"
-              Margin="0,12,0,0"
+              Margin="0,16,0,0"
               Style="{StaticResource EditPanelStyle}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -202,10 +207,7 @@
                         Grid.Column="1"
                         Width="140"
                         Margin="0,0,8,0"
-                        VerticalAlignment="Center"
-                        Background="{DynamicResource InputBackgroundBrush}"
-                        BorderBrush="{DynamicResource InputBorderBrush}"
-                        Foreground="{DynamicResource InputForegroundBrush}"
+                        Style="{StaticResource InputDatePickerStyle}"
                         SelectedDate="{Binding EditTodoDueDate, Mode=TwoWay}"/>
 
             <Button Grid.Row="0"
@@ -234,14 +236,13 @@
                  ItemTemplate="{StaticResource TodoItemTemplate}"/>
 
         <Grid Grid.Row="6">
-            <TextBlock Foreground="Gray"
-               Text="내용을 입력한 후 Enter를 눌러도 추가됩니다."
-               VerticalAlignment="Center"/>
+            <TextBlock Text="내용을 입력한 후 Enter를 눌러도 추가됩니다."
+                       Style="{StaticResource HelpTextBlockStyle}"/>
 
             <Button Content="설정"
-            Style="{StaticResource SmallButtonStyle}"
-            HorizontalAlignment="Right"
-            Click="SettingsButton_Click"/>
+                    Style="{StaticResource SmallButtonStyle}"
+                    HorizontalAlignment="Right"
+                    Click="SettingsButton_Click"/>
         </Grid>
     </Grid>
 </Window>

@@ -7,6 +7,7 @@
     <SolidColorBrush x:Key="SecondaryTextBrush" Color="#666666"/>
     <SolidColorBrush x:Key="InputBackgroundBrush" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="InputForegroundBrush" Color="#222222"/>
+    <SolidColorBrush x:Key="ComboBoxForegroundBrush" Color="#222222"/>
     <SolidColorBrush x:Key="InputBorderBrush" Color="#B8B8B8"/>
     <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="#F2F2F2"/>
     <SolidColorBrush x:Key="ButtonForegroundBrush" Color="#111111"/>
