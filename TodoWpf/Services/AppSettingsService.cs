@@ -15,12 +15,23 @@ public class AppSettingsService : IAppSettingsService
     };
 
     public AppSettingsService()
+        : this(GetDefaultSettingsFilePath())
+    {
+    }
+
+    public AppSettingsService(string settingsFilePath)
+    {
+        this.settingsFilePath = settingsFilePath;
+    }
+
+    private static string GetDefaultSettingsFilePath()
     {
         string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         string settingsFolder = Path.Combine(appDataFolder, "TodoWpf");
 
-        settingsFilePath = Path.Combine(settingsFolder, "appsettings.json");
+        return Path.Combine(settingsFolder, "appsettings.json");
     }
+
 
     public AppSettings Load()
     {

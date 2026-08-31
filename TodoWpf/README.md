@@ -35,7 +35,7 @@ WPF와 MVVM 패턴을 학습하기 위한 간단한 할 일 관리 앱입니다.
 - 최신순, 오래된순, 제목순, 미완료순, 마감일순 정렬
 - 설정 창에서 시작 필터, 검색어 기억, 테마 옵션 관리
 - 밝은 테마 / 어두운 테마 적용 및 저장
-- ViewModel 단위 테스트
+- ViewModel 및 Service 단위 테스트
 - 스타일과 리소스 딕셔너리 분리
 - DI 컨테이너를 통한 ViewModel과 Service 생성
 
@@ -68,7 +68,13 @@ learning-wpf-todolist/
 │  │  └─ SettingsWindowViewModel.cs
 │  └─ TodoWpf.csproj
 ├─ TodoWpf.Tests/
+│  ├─ AppSettingsServiceTests.cs
+│  ├─ FakeAppSettingsService.cs
+│  ├─ FakeThemeService.cs
 │  ├─ MainWindowViewModelTests.cs
+│  ├─ SettingsWindowViewModelTests.cs
+│  ├─ TestFileHelper.cs
+│  ├─ TodoStorageServiceTests.cs
 │  └─ TodoWpf.Tests.csproj
 └─ docs/
    └─ wpf-csharp-development-guide.md
@@ -93,7 +99,11 @@ learning-wpf-todolist/
 - `Styles/TodoStyles.xaml`: 화면에서 재사용하는 스타일과 할 일 항목 템플릿을 정의합니다.
 - `Styles/Themes/LightTheme.xaml`: 밝은 테마 색상 리소스를 정의합니다.
 - `Styles/Themes/DarkTheme.xaml`: 어두운 테마 색상 리소스를 정의합니다.
-- `TodoWpf.Tests/MainWindowViewModelTests.cs`: ViewModel의 추가, 삭제, 저장, 필터, 검색 동작을 검증합니다.
+- `TodoWpf.Tests/MainWindowViewModelTests.cs`: 메인 ViewModel의 추가, 삭제, 저장, 필터, 검색, 정렬, 편집, 입력 검증 동작을 검증합니다.
+- `TodoWpf.Tests/SettingsWindowViewModelTests.cs`: 설정 창 ViewModel의 설정 복사, 저장, 취소 동작을 검증합니다.
+- `TodoWpf.Tests/TodoStorageServiceTests.cs`: 할 일 JSON 저장소의 저장, 불러오기, 예외 상황 복구를 검증합니다.
+- `TodoWpf.Tests/AppSettingsServiceTests.cs`: 사용자 설정 JSON 저장소의 저장, 불러오기, 기본값 복구를 검증합니다.
+- `TodoWpf.Tests/TestFileHelper.cs`: 서비스 테스트에서 사용할 임시 파일 경로를 만듭니다.
 - `TodoWpf.csproj`: WPF, .NET, NuGet 패키지 설정을 관리합니다.
 
 ## 실행 방법
@@ -119,7 +129,7 @@ cd D:\Dev\WPF\learning-wpf-todolist
 dotnet test
 ```
 
-현재 테스트는 `MainWindowViewModel`을 대상으로 하며, 실제 JSON 파일을 쓰지 않도록 `FakeTodoStorageService`를 사용합니다. 추가, 삭제, 완료 항목 삭제, 전체 삭제, 저장, 필터, 검색, 정렬, 수정 시작, 수정 저장, 수정 취소, 입력 검증, 날짜 메타데이터, 마감일 입력과 편집 동작을 검증합니다.
+현재 테스트는 `MainWindowViewModel`, `SettingsWindowViewModel`, `TodoStorageService`, `AppSettingsService`를 대상으로 합니다. ViewModel 테스트에서는 실제 JSON 파일을 쓰지 않도록 fake service를 사용하고, Service 테스트에서는 임시 파일 경로를 주입해 저장, 불러오기, 폴더 생성, 깨진 JSON 복구, 들여쓰기 JSON 출력을 검증합니다.
 
 ## 사용 기술
 
@@ -136,8 +146,8 @@ dotnet test
 
 ## 다음 학습 과제
 
-- 서비스 테스트 심화
 - 정렬 설정 저장
+- 마감일 필터
 
 ## 메모
 
